@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Astro-Score PRO</title>
+    <title>Astro-Score Ultra</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --accent-color: #8fb6ff;
+            --glass-bg: rgba(10, 15, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #060913; /* Очень темный фон космоса */
+            background: #02040a;
             color: #ffffff;
             padding: 20px;
             margin: 0;
@@ -24,8 +30,8 @@
             width: 200%;
             height: 200%;
             z-index: -1;
-            transition: opacity 0.5s ease-out;
-            animation: rotateSky 800s linear infinite; /* Плавное вращение */
+            transition: opacity 0.8s ease-in-out;
+            animation: rotateSky 1200s linear infinite;
         }
 
         @keyframes rotateSky {
@@ -36,41 +42,39 @@
         h2 {
             text-align: center;
             margin-top: 10px;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-            background: -webkit-linear-gradient(#e0c3fc, #8ec5fc);
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff 0%, #8fb6ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .control-group, .result-box {
-            margin-bottom: 20px;
-            background: rgba(15, 20, 35, 0.45);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 18px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            margin-bottom: 18px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         }
 
         .header-flex {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #d1d5db;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1.5px;
         }
         
         .header-flex span:last-child {
-            color: #8ec5fc;
-            font-weight: 700;
+            color: var(--accent-color);
+            font-weight: 600;
         }
 
         input[type=range] {
@@ -81,58 +85,50 @@
 
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 24px;
-            width: 24px;
+            height: 20px;
+            width: 20px;
             border-radius: 50%;
-            background: #ffffff;
+            background: #fff;
             cursor: pointer;
-            margin-top: -9px;
-            box-shadow: 0 0 12px rgba(142, 197, 252, 0.9);
+            margin-top: -8px;
+            box-shadow: 0 0 15px var(--accent-color);
         }
 
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
         }
 
         select {
             width: 100%;
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 600;
-            outline: none;
+            border: 1px solid var(--glass-border);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 15px;
             appearance: none;
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
             background-repeat: no-repeat;
             background-position: right 15px top 50%;
-            background-size: 12px auto;
-        }
-
-        .result-box {
-            text-align: center;
-            margin-top: 25px;
-            background: linear-gradient(135deg, rgba(20,30,50,0.6) 0%, rgba(10,15,25,0.8) 100%);
+            background-size: 10px auto;
         }
 
         .score-val {
-            font-size: 64px;
-            font-weight: 800;
+            font-size: 72px;
+            font-weight: 200;
             margin: 5px 0;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            transition: color 0.3s ease;
+            transition: all 0.5s ease;
         }
 
         .verdict {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 3px;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -153,33 +149,23 @@
     </div>
 
     <div class="control-group">
-        <div class="header-flex">
-            <span>Облачность</span>
-            <span id="cloudsVal">0%</span>
-        </div>
+        <div class="header-flex"><span>Облачность</span><span id="cloudsVal">0%</span></div>
         <input type="range" id="clouds" min="0" max="100" value="0" oninput="calculate()">
     </div>
 
     <div class="control-group">
-        <div class="header-flex">
-            <span>Видимость</span>
-            <span id="visVal">24 км</span>
-        </div>
+        <div class="header-flex"><span>Видимость</span><span id="visVal">24 км</span></div>
         <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="calculate()">
     </div>
 
     <div class="control-group">
-        <div class="header-flex">
-            <span>Ветер</span>
-            <span id="windVal">0 м/с</span>
-        </div>
+        <div class="header-flex"><span>Ветер</span><span id="windVal">0 м/с</span></div>
         <input type="range" id="wind" min="0" max="25" value="0" oninput="calculate()">
     </div>
 
     <div class="result-box">
-        <div style="opacity: 0.7; font-size: 13px; text-transform: uppercase; letter-spacing: 2px;">Итоговый индекс</div>
-        <div id="scoreDisplay" class="score-val">10/10</div>
-        <div id="verdictDisplay" class="verdict">Отличные условия</div>
+        <div id="scoreDisplay" class="score-val">10</div>
+        <div id="verdictDisplay" class="verdict">Excellent</div>
     </div>
 
     <script>
@@ -189,45 +175,47 @@
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d');
         let stars = [];
+        let milkyWayStars = [];
         let nebulas = [];
 
-        // Цвета глубокого космоса для туманностей
-        const nebulaColors = [
-            'rgba(76, 29, 149, 0.04)',  // Глубокий фиолетовый
-            'rgba(30, 58, 138, 0.05)',  // Темно-синий
-            'rgba(134, 25, 143, 0.03)', // Маджента
-            'rgba(8, 145, 178, 0.04)'   // Циан
-        ];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth * 2;
-            canvas.height = window.innerHeight * 2;
-            initSpace();
-        }
+        const starColors = ['#ffffff', '#fff4ea', '#eaf4ff', '#fff9e5'];
 
         function initSpace() {
+            canvas.width = window.innerWidth * 2;
+            canvas.height = window.innerHeight * 2;
             stars = [];
+            milkyWayStars = [];
             nebulas = [];
             
-            // 1. Генерация туманностей (Млечный Путь)
-            // Создаем широкую диагональную полосу из газовых облаков
-            for(let i = 0; i < 40; i++) {
+            // 1. Млечный путь (Галактическая пыль)
+            for(let i = 0; i < 60; i++) {
                 nebulas.push({
-                    x: Math.random() * canvas.width,
-                    y: (canvas.height / 2) + (Math.random() - 0.5) * (canvas.height * 0.8),
-                    radius: Math.random() * 400 + 200, // Большие облака
-                    color: nebulaColors[Math.floor(Math.random() * nebulaColors.length)]
+                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.8,
+                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.3,
+                    radius: Math.random() * 300 + 100,
+                    color: `rgba(${30 + Math.random()*20}, ${30 + Math.random()*40}, ${80 + Math.random()*50}, ${0.03 + Math.random()*0.02})`
                 });
             }
 
-            // 2. Генерация звезд
-            for(let i = 0; i < 600; i++) {
+            // 2. Звездная пыль Млечного Пути
+            for(let i = 0; i < 2000; i++) {
+                milkyWayStars.push({
+                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.7,
+                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.25,
+                    size: Math.random() * 0.6,
+                    alpha: Math.random() * 0.5
+                });
+            }
+
+            // 3. Основные звезды
+            for(let i = 0; i < 800; i++) {
                 stars.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.5 + 0.1,
+                    radius: Math.random() * 1.1 + 0.1,
+                    color: starColors[Math.floor(Math.random() * starColors.length)],
                     alpha: Math.random(),
-                    speed: Math.random() * 0.03 + 0.01,
+                    scintillation: Math.random() * 0.02 + 0.005,
                     dir: Math.random() > 0.5 ? 1 : -1
                 });
             }
@@ -236,125 +224,68 @@
         function drawSpace() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Отрисовка газовых облаков (Туманности)
-            // Используем 'lighter' чтобы цвета красиво смешивались и светились
-            ctx.globalCompositeOperation = 'lighter';
+            // Небулы
+            ctx.globalCompositeOperation = 'screen';
             nebulas.forEach(n => {
-                let grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
-                grad.addColorStop(0, n.color);
-                grad.addColorStop(1, 'transparent');
-                
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
-                ctx.fill();
+                let g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
+                g.addColorStop(0, n.color);
+                g.addColorStop(1, 'transparent');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(n.x, n.y, n.radius, 0, Math.PI*2); ctx.fill();
             });
-            
-            // Возвращаем обычный режим наложения для звезд
-            ctx.globalCompositeOperation = 'source-over';
-            
-            // Отрисовка звезд
-            ctx.fillStyle = '#ffffff';
-            stars.forEach(s => {
-                s.alpha += s.speed * s.dir;
-                if (s.alpha >= 1) { s.alpha = 1; s.dir = -1; }
-                if (s.alpha <= 0.2) { s.alpha = 0.2; s.dir = 1; }
 
+            // Пыль
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            milkyWayStars.forEach(s => {
                 ctx.globalAlpha = s.alpha;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-                
-                if(s.radius > 1.2) {
-                    ctx.shadowBlur = Math.random() * 10 + 5;
-                    ctx.shadowColor = "white";
-                } else {
-                    ctx.shadowBlur = 0;
-                }
-                ctx.fill();
+                ctx.fillRect(s.x, s.y, s.size, s.size);
             });
+
+            // Звезды
+            stars.forEach(s => {
+                s.alpha += s.scintillation * s.dir;
+                if(s.alpha >= 1 || s.alpha <= 0.3) s.dir *= -1;
+                ctx.globalAlpha = s.alpha;
+                ctx.fillStyle = s.color;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2); ctx.fill();
+            });
+
             requestAnimationFrame(drawSpace);
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        drawSpace(); 
-
-        // --- ЛОГИКА КАЛЬКУЛЯТОРА ---
         function calculate() {
-            let mode = document.getElementById('mode').value;
-            let clouds = parseInt(document.getElementById('clouds').value);
-            let vis = parseInt(document.getElementById('vis').value);
-            let wind = parseInt(document.getElementById('wind').value);
+            let m = document.getElementById('mode').value;
+            let c = parseInt(document.getElementById('clouds').value);
+            let v = parseInt(document.getElementById('vis').value);
+            let w = parseInt(document.getElementById('wind').value);
 
-            document.getElementById('cloudsVal').innerText = clouds + '%';
-            document.getElementById('visVal').innerText = (vis / 1000).toFixed(1) + ' км';
-            document.getElementById('windVal').innerText = wind + ' м/с';
+            document.getElementById('cloudsVal').innerText = c + '%';
+            document.getElementById('visVal').innerText = (v / 1000).toFixed(0) + ' км';
+            document.getElementById('windVal').innerText = w + ' м/с';
 
             let score = 10;
+            if (c > 20) score -= 2; if (c > 50) score -= 2;
+            if (v < 8000) score -= 1; if (v < 5000) score -= 1; if (v < 2000) score -= 5;
+            if (w > 8) score -= 1; if (w > 12) score -= 1;
 
-            if (clouds > 20) score -= 2;
-            if (clouds > 50) score -= 2;
-            
-            if (vis < 8000) score -= 1;
-            if (vis < 5000) score -= 1;
-            if (vis < 2000) score -= 5; 
-
-            if (wind > 8) score -= 1;
-            if (wind > 12) score -= 1;
-
-            if (mode === 'milky_way') {
-                if (clouds > 30) score -= 2;
-                if (clouds > 50) score -= 2;
-                if (wind > 6) score -= 1;
-            } else if (mode === 'landscape') {
-                if (clouds > 70) score -= 1;
-            } else if (mode === 'planets_moon') {
-                if (wind > 6) score -= 2;
-                if (vis < 8000) score -= 1;
-                if (vis < 5000) score -= 1;
-                if (clouds > 50) score -= 1;
-            } else if (mode === 'deep_sky') {
-                if (clouds > 20) score -= 3;
-                if (clouds > 40) score -= 3;
-                if (vis < 10000) score -= 2;
-                if (vis < 7000) score -= 2;
-            }
+            if (m === 'milky_way') { if (c > 30) score -= 2; if (c > 50) score -= 2; if (w > 6) score -= 1; }
+            else if (m === 'deep_sky') { if (c > 20) score -= 3; if (c > 40) score -= 3; if (v < 10000) score -= 2; }
 
             score = Math.max(0, Math.min(10, score));
+            let res = document.getElementById('scoreDisplay');
+            let verd = document.getElementById('verdictDisplay');
+            
+            res.innerText = score;
+            if (score >= 8) { res.style.color = '#00ffaa'; verd.innerText = "Excellent"; }
+            else if (score >= 5) { res.style.color = '#ffcc00'; verd.innerText = "Fair"; }
+            else { res.style.color = '#ff4444'; verd.innerText = "Poor"; }
 
-            let verdict = "Плохие условия";
-            let color = "#ff4d4d"; 
-            let shadowColor = "rgba(255, 77, 77, 0.6)";
-            
-            if (score >= 8) {
-                verdict = "Отличные условия";
-                color = "#00e676"; 
-                shadowColor = "rgba(0, 230, 118, 0.6)";
-            } else if (score >= 5) {
-                verdict = "Средние условия";
-                color = "#ffea00"; 
-                shadowColor = "rgba(255, 234, 0, 0.6)";
-            }
-
-            let scoreEl = document.getElementById('scoreDisplay');
-            scoreEl.innerText = score + '/10';
-            scoreEl.style.color = color;
-            scoreEl.style.textShadow = `0 0 20px ${shadowColor}`;
-            
-            document.getElementById('verdictDisplay').innerText = verdict;
-            document.getElementById('verdictDisplay').style.color = color;
-
-            // Связь видимости космоса с погодой
-            let visFactor = Math.min(1, vis / 12000); 
-            let cloudsFactor = 1 - (clouds / 100);
-            let skyOpacity = cloudsFactor * visFactor;
-            
-            // Если погода совсем плохая, оставляем только 1% прозрачности (почти чернота)
-            skyOpacity = Math.max(0.01, skyOpacity); 
-            
-            canvas.style.opacity = skyOpacity;
+            canvas.style.opacity = Math.max(0.01, (1 - c/100) * (v/20000));
         }
 
+        window.addEventListener('resize', initSpace);
+        initSpace();
+        drawSpace();
         calculate();
     </script>
 </body>
