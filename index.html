@@ -1,253 +1,50 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Astro-Score Ultra</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --accent-color: #8fb6ff;
-            --glass-bg: rgba(10, 15, 25, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #02040a;
-            color: #ffffff;
-            padding: 20px;
-            margin: 0;
-            box-sizing: border-box;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        #starCanvas {
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            z-index: -1;
-            transition: opacity 0.8s ease-in-out;
-            animation: rotateSky 1200s linear infinite;
-        }
-
-        @keyframes rotateSky {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        h2 {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 24px;
-            font-weight: 300;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff 0%, #8fb6ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .control-group, .result-box {
-            margin-bottom: 18px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 16px;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-        }
-
-        .header-flex {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.6);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        
-        .header-flex span:last-child {
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #fff;
-            cursor: pointer;
-            margin-top: -8px;
-            box-shadow: 0 0 15px var(--accent-color);
-        }
-
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
-            background-color: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-size: 15px;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 15px top 50%;
-            background-size: 10px auto;
-        }
-
-        .score-val {
-            font-size: 72px;
-            font-weight: 200;
-            margin: 5px 0;
-            transition: all 0.5s ease;
-        }
-
-        .verdict {
-            font-size: 14px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            opacity: 0.8;
-        }
-    </style>
-</head>
-<body>
-
-    <canvas id="starCanvas"></canvas>
-
-    <h2>Astro-Score</h2>
-
-    <div class="control-group">
-        <label class="header-flex"><span>Режим съёмки</span><span></span></label>
-        <select id="mode" oninput="calculate()">
-            <option value="milky_way">🌌 Млечный Путь</option>
-            <option value="landscape">⛰ Ночной пейзаж</option>
-            <option value="planets_moon">🪐 Планеты и Луна</option>
-            <option value="deep_sky">🔭 Deep Sky</option>
-        </select>
-    </div>
-
-    <div class="control-group">
-        <div class="header-flex"><span>Облачность</span><span id="cloudsVal">0%</span></div>
-        <input type="range" id="clouds" min="0" max="100" value="0" oninput="calculate()">
-    </div>
-
-    <div class="control-group">
-        <div class="header-flex"><span>Видимость</span><span id="visVal">24 км</span></div>
-        <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="calculate()">
-    </div>
-
-    <div class="control-group">
-        <div class="header-flex"><span>Ветер</span><span id="windVal">0 м/с</span></div>
-        <input type="range" id="wind" min="0" max="25" value="0" oninput="calculate()">
-    </div>
-
-    <div class="result-box">
-        <div id="scoreDisplay" class="score-val">10</div>
-        <div id="verdictDisplay" class="verdict">Excellent</div>
-    </div>
-
-    <script>
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-
-        const canvas = document.getElementById('starCanvas');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
-        let milkyWayStars = [];
-        let nebulas = [];
-
-        const starColors = ['#ffffff', '#fff4ea', '#eaf4ff', '#fff9e5'];
-
-        function initSpace() {
-            canvas.width = window.innerWidth * 2;
-            canvas.height = window.innerHeight * 2;
-            stars = [];
-            milkyWayStars = [];
-            nebulas = [];
-            
-            // 1. Млечный путь (Галактическая пыль)
-            for(let i = 0; i < 60; i++) {
-                nebulas.push({
-                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.8,
-                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.3,
-                    radius: Math.random() * 300 + 100,
-                    color: `rgba(${30 + Math.random()*20}, ${30 + Math.random()*40}, ${80 + Math.random()*50}, ${0.03 + Math.random()*0.02})`
-                });
-            }
-
-            // 2. Звездная пыль Млечного Пути
-            for(let i = 0; i < 2000; i++) {
-                milkyWayStars.push({
-                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.7,
-                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.25,
-                    size: Math.random() * 0.6,
-                    alpha: Math.random() * 0.5
-                });
-            }
-
-            // 3. Основные звезды
-            for(let i = 0; i < 800; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.1 + 0.1,
-                    color: starColors[Math.floor(Math.random() * starColors.length)],
-                    alpha: Math.random(),
-                    scintillation: Math.random() * 0.02 + 0.005,
-                    dir: Math.random() > 0.5 ? 1 : -1
-                });
-            }
-        }
-
-        function drawSpace() {
+function drawSpace() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Небулы
+            // Получаем текущие значения для динамической отрисовки
+            let v = parseInt(document.getElementById('vis').value);
+            let c = parseInt(document.getElementById('clouds').value);
+            
+            // Рассчитываем коэффициент чистоты неба (0.0 - 1.0)
+            let purity = Math.max(0, (1 - c/100) * (v/24000));
+
+            // 1. Отрисовка Туманностей (Небул)
+            // Их яркость теперь напрямую зависит от чистоты атмосферы
             ctx.globalCompositeOperation = 'screen';
             nebulas.forEach(n => {
                 let g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
-                g.addColorStop(0, n.color);
+                // Умножаем прозрачность цвета на purity
+                let colorWithAlpha = n.color.replace(/[\d\.]+\)$/g, (match) => {
+                    return (parseFloat(match) * purity).toFixed(3) + ")";
+                });
+                
+                g.addColorStop(0, colorWithAlpha);
                 g.addColorStop(1, 'transparent');
                 ctx.fillStyle = g;
-                ctx.beginPath(); ctx.arc(n.x, n.y, n.radius, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); 
+                ctx.arc(n.x, n.y, n.radius, 0, Math.PI*2); 
+                ctx.fill();
             });
 
-            // Пыль
-            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            // 2. Звездная пыль (микро-звезды)
+            ctx.globalCompositeOperation = 'source-over';
             milkyWayStars.forEach(s => {
-                ctx.globalAlpha = s.alpha;
+                ctx.globalAlpha = s.alpha * purity;
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.fillRect(s.x, s.y, s.size, s.size);
             });
 
-            // Звезды
+            // 3. Основные звезды
             stars.forEach(s => {
                 s.alpha += s.scintillation * s.dir;
                 if(s.alpha >= 1 || s.alpha <= 0.3) s.dir *= -1;
-                ctx.globalAlpha = s.alpha;
+                
+                // Звезды гаснут плавно в зависимости от условий
+                ctx.globalAlpha = s.alpha * purity;
                 ctx.fillStyle = s.color;
-                ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); 
+                ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2); 
+                ctx.fill();
             });
 
             requestAnimationFrame(drawSpace);
@@ -264,6 +61,7 @@
             document.getElementById('windVal').innerText = w + ' м/с';
 
             let score = 10;
+            // Логика штрафов
             if (c > 20) score -= 2; if (c > 50) score -= 2;
             if (v < 8000) score -= 1; if (v < 5000) score -= 1; if (v < 2000) score -= 5;
             if (w > 8) score -= 1; if (w > 12) score -= 1;
@@ -276,17 +74,13 @@
             let verd = document.getElementById('verdictDisplay');
             
             res.innerText = score;
+            
+            // Цветовая индикация
             if (score >= 8) { res.style.color = '#00ffaa'; verd.innerText = "Excellent"; }
             else if (score >= 5) { res.style.color = '#ffcc00'; verd.innerText = "Fair"; }
             else { res.style.color = '#ff4444'; verd.innerText = "Poor"; }
 
-            canvas.style.opacity = Math.max(0.01, (1 - c/100) * (v/20000));
+            // ВАЖНО: Убираем общее управление прозрачностью канваса, 
+            // так как теперь мы управляем каждым элементом внутри drawSpace для большей мягкости.
+            canvas.style.opacity = "1"; 
         }
-
-        window.addEventListener('resize', initSpace);
-        initSpace();
-        drawSpace();
-        calculate();
-    </script>
-</body>
-</html>
