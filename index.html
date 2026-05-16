@@ -32,7 +32,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
-            padding: 20px;
+            padding: 15px;
             margin: 0;
             box-sizing: border-box;
             overflow-x: hidden;
@@ -61,7 +61,7 @@
             from { transform: rotate(0deg); } to { transform: rotate(360deg); }
         }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 
         h2 {
             font-size: 20px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase;
@@ -70,23 +70,33 @@
         }
         body.red-mode h2 { background: none; color: var(--accent-color); -webkit-text-fill-color: var(--accent-color); }
 
-        .btn-action {
-            background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color);
-            padding: 12px 16px; border-radius: 16px; font-size: 14px; text-transform: uppercase;
-            letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s;
-            width: 100%; font-weight: 600; margin-top: 10px;
-        }
-        .btn-action:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
-        body.red-mode .btn-action:active { background: rgba(255,0,0,0.2); }
-
         .btn-red {
             background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color);
             padding: 8px 16px; border-radius: 20px; font-size: 12px; text-transform: uppercase;
             letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s;
         }
 
-        .section-title { margin-top: 35px; text-align: center; }
+        /* --- ТАБЫ (ВКЛАДКИ) --- */
+        .tabs-container {
+            display: flex; justify-content: space-between;
+            background: var(--glass-bg); border-radius: 16px;
+            padding: 4px; border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px); margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-color);
+            padding: 10px 0; border-radius: 12px; font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            transition: all 0.3s; opacity: 0.6;
+        }
+        .tab-btn.active { background: rgba(255,255,255,0.15); opacity: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        body.red-mode .tab-btn.active { background: rgba(255,0,0,0.2); }
+        .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+        .tab-content.active { display: block; }
 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ЭЛЕМЕНТЫ УПРАВЛЕНИЯ --- */
         .control-group, .result-box {
             margin-top: 15px; background: var(--glass-bg); backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
@@ -110,7 +120,7 @@
         body.red-mode .num-input { background: rgba(255, 0, 0, 0.05); }
         body.red-mode .num-input:focus { background: rgba(255, 0, 0, 0.15); }
         
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
             background: var(--text-color); cursor: pointer; margin-top: -7px;
@@ -124,7 +134,7 @@
         select {
             width: 100%; padding: 12px; border-radius: 12px;
             border: 1px solid var(--glass-border); background-color: rgba(0, 0, 0, 0.3);
-            color: var(--text-color); font-size: 15px; appearance: none;
+            color: var(--text-color); font-size: 15px; appearance: none; margin-bottom: 10px;
         }
 
         .flex-row { display: flex; gap: 10px; margin-top: 10px; }
@@ -133,14 +143,30 @@
         .val-label { font-size: 10px; text-transform: uppercase; opacity: 0.6; }
         .verdict { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-top: 10px; text-align: center; }
 
+        .btn-action {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color);
+            padding: 12px 16px; border-radius: 16px; font-size: 14px; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s;
+            width: 100%; font-weight: 600; margin-top: 10px;
+        }
+        .btn-action:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
+        body.red-mode .btn-action:active { background: rgba(255,0,0,0.2); }
+
         .radar-container {
-            width: 240px; height: 240px; margin: 0 auto; position: relative;
+            width: 100%; height: 240px; margin: 0 auto; position: relative;
             border-radius: 50%; border: 1px solid var(--glass-border);
             background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(255,255,255,0.05) 100%);
             box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
             overflow: hidden;
+            max-width: 240px;
         }
         body.red-mode .radar-container { background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(255,0,0,0.05) 100%); }
+        
+        .visualizer-box {
+            width: 100%; height: 120px; border-radius: 16px; 
+            border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5);
+            margin-top: 15px; position: relative; overflow: hidden;
+        }
 
     </style>
 </head>
@@ -149,143 +175,153 @@
     <div id="skyContainer"><canvas id="starCanvas"></canvas></div>
 
     <div class="top-bar">
-        <h2>Astro-Score</h2>
+        <h2>Astro-Pro</h2>
         <button class="btn-red" onclick="toggleRedMode()" id="btnRed">🔴 Night</button>
     </div>
 
-    <!-- БЛОК 1: ПОГОДА -->
-    <div class="control-group">
-        <label class="header-flex"><span>Режим съёмки</span><span></span></label>
-        <select id="mode" oninput="calculate()">
-            <option value="milky_way">🌌 Млечный Путь</option>
-            <option value="landscape">⛰ Ночной пейзаж</option>
-            <option value="deep_sky">🔭 Deep Sky</option>
-        </select>
+    <!-- Вкладки -->
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('tab-weather', this)">Погода</button>
+        <button class="tab-btn" onclick="switchTab('tab-shutter', this)">Выдержка</button>
+        <button class="tab-btn" onclick="switchTab('tab-radar', this)">Радар</button>
+        <button class="tab-btn" onclick="switchTab('tab-dew', this)">Роса</button>
     </div>
 
-    <div class="control-group">
-        <div class="header-flex">
-            <span>Облачность</span>
-            <span><input type="text" inputmode="decimal" id="cloudsNum" class="num-input" value="0" onclick="this.select()" oninput="document.getElementById('clouds').value = this.value; calculate();"> %</span>
+    <!-- ================= Вкладка: ПОГОДА ================= -->
+    <div id="tab-weather" class="tab-content active">
+        <div class="control-group">
+            <label class="header-flex"><span>Режим съёмки</span><span></span></label>
+            <select id="mode" oninput="calculate()">
+                <option value="milky_way">🌌 Млечный Путь</option>
+                <option value="landscape">⛰ Ночной пейзаж</option>
+                <option value="deep_sky">🔭 Deep Sky</option>
+            </select>
         </div>
-        <input type="range" id="clouds" min="0" max="100" value="0" oninput="document.getElementById('cloudsNum').value = this.value; calculate();">
-        <br><br>
+
+        <div class="control-group">
+            <div class="header-flex">
+                <span>Облачность</span>
+                <span><input type="text" inputmode="decimal" id="cloudsNum" class="num-input" value="0" onclick="this.select()" oninput="document.getElementById('clouds').value = this.value; calculate();"> %</span>
+            </div>
+            <input type="range" id="clouds" min="0" max="100" value="0" oninput="document.getElementById('cloudsNum').value = this.value; calculate();">
+            <br>
+            
+            <div class="header-flex">
+                <span>Видимость</span>
+                <span><input type="text" inputmode="decimal" id="visNum" class="num-input" value="24000" step="1000" onclick="this.select()" oninput="document.getElementById('vis').value = this.value; calculate();"> м</span>
+            </div>
+            <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="document.getElementById('visNum').value = this.value; calculate();">
+        </div>
+
+        <div class="result-box">
+            <div class="flex-row">
+                <div class="flex-col">
+                    <div class="val-label">Рейтинг неба</div>
+                    <div id="scoreDisplay" class="val-big">10</div>
+                </div>
+                <div class="flex-col" style="display:flex; align-items:center; justify-content:center;">
+                    <div id="verdictDisplay" class="verdict">Excellent</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Вкладка: ВЫДЕРЖКА ================= -->
+    <div id="tab-shutter" class="tab-content">
+        <div class="control-group">
+            <label class="header-flex"><span>Система / Матрица</span><span></span></label>
+            <select id="cameraProfile" onchange="updateProfile()">
+                <option value="nikon_z_fx">Nikon Z (FX) - Full Frame</option>
+                <option value="nikon_z_dx">Nikon Z (DX) - APS-C</option>
+                <option value="fujifilm_x_apsc" selected>Fujifilm X - APS-C</option>
+                <option value="sony_e_ff">Sony E - Full Frame</option>
+                <option value="sony_e_apsc">Sony E - APS-C</option>
+                <option value="canon_rf_ff">Canon RF - Full Frame</option>
+                <option value="canon_rf_apsc">Canon RF - APS-C</option>
+                <option value="ricoh_gr_apsc">Ricoh GR - APS-C</option>
+                <option value="leica_l_ff">Leica L - Full Frame</option>
+                <option value="leica_m_ff">Leica M - Full Frame</option>
+                <option value="leica_q_ff">Leica Q - Full Frame</option>
+            </select>
+
+            <div class="header-flex" style="margin-top: 10px;">
+                <span>Разрешение</span>
+                <span><input type="text" inputmode="decimal" id="mpNum" class="num-input" value="26" onclick="this.select()" oninput="document.getElementById('mp').value = this.value; calculateShutter();"> Мп</span>
+            </div>
+            <input type="range" id="mp" min="10" max="100" value="26" oninput="document.getElementById('mpNum').value = this.value; calculateShutter();">
+        </div>
+
+        <div class="control-group">
+            <div class="header-flex">
+                <span>Фокусное (мм)</span>
+                <span><input type="text" inputmode="decimal" id="focalNum" class="num-input" value="16" onclick="this.select()" oninput="document.getElementById('focal').value = this.value; calculateShutter();"></span>
+            </div>
+            <input type="range" id="focal" min="10" max="400" value="16" oninput="document.getElementById('focalNum').value = this.value; calculateShutter();">
+            
+            <div class="header-flex" style="margin-top: 15px;">
+                <span>Тестовая выдержка</span>
+                <span><input type="text" inputmode="decimal" id="testExpNum" class="num-input" value="15" onclick="this.select()" oninput="document.getElementById('testExp').value = this.value; drawStarTrails();"> с</span>
+            </div>
+            <input type="range" id="testExp" min="1" max="60" value="15" oninput="document.getElementById('testExpNum').value = this.value; drawStarTrails();">
+            
+            <!-- Интерактивный канвас для смаза -->
+            <div class="visualizer-box">
+                <canvas id="trailCanvas" style="width: 100%; height: 100%;"></canvas>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <div class="flex-row">
+                <div class="flex-col">
+                    <div class="val-label">Шаг пикселя</div>
+                    <div id="pixelPitchDisplay" class="val-big" style="font-size:24px; opacity:0.7">0 мкм</div>
+                </div>
+                <div class="flex-col">
+                    <div class="val-label">Идеал (без смаза)</div>
+                    <div id="shutterMax" class="val-big" style="color: var(--accent-color)">0s</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Вкладка: РАДАР ================= -->
+    <div id="tab-radar" class="tab-content">
+        <div class="control-group">
+            <div class="radar-container">
+                <canvas id="radarCanvas" width="240" height="240"></canvas>
+            </div>
+            <div class="result-box" style="padding: 12px; margin-top: 15px;">
+                <div id="radarResult" class="verdict" style="margin:0; font-size: 11px;">ГОТОВ К СКАНИРОВАНИЮ</div>
+            </div>
+            <button class="btn-action" id="scanBtn" onclick="startScan()">📡 Запуск сканирования</button>
+        </div>
+    </div>
+
+    <!-- ================= Вкладка: РОСА ================= -->
+    <div id="tab-dew" class="tab-content">
+        <div class="control-group">
+            <div class="header-flex">
+                <span>Температура (°C)</span>
+                <span><input type="text" inputmode="decimal" id="tempNum" class="num-input" value="15" onclick="this.select()" oninput="document.getElementById('temp').value = this.value; calculateDew();"></span>
+            </div>
+            <input type="range" id="temp" min="-20" max="40" value="15" oninput="document.getElementById('tempNum').value = this.value; calculateDew();">
+            <br>
+            <div class="header-flex">
+                <span>Влажность (%)</span>
+                <span><input type="text" inputmode="decimal" id="humNum" class="num-input" value="75" onclick="this.select()" oninput="document.getElementById('hum').value = this.value; calculateDew();"></span>
+            </div>
+            <input type="range" id="hum" min="20" max="100" value="75" oninput="document.getElementById('humNum').value = this.value; calculateDew();">
+        </div>
         
-        <div class="header-flex">
-            <span>Видимость</span>
-            <span><input type="text" inputmode="decimal" id="visNum" class="num-input" value="24000" step="1000" onclick="this.select()" oninput="document.getElementById('vis').value = this.value; calculate();"> м</span>
-        </div>
-        <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="document.getElementById('visNum').value = this.value; calculate();">
-    </div>
-
-    <div class="result-box">
-        <div class="flex-row">
-            <div class="flex-col">
-                <div class="val-label">Рейтинг неба</div>
-                <div id="scoreDisplay" class="val-big">10</div>
+        <div class="result-box">
+            <div class="flex-row">
+                <div class="flex-col">
+                    <div class="val-label">Точка росы</div>
+                    <div id="dewDisplay" class="val-big">10.6°C</div>
+                </div>
             </div>
-            <div class="flex-col" style="display:flex; align-items:center; justify-content:center;">
-                <div id="verdictDisplay" class="verdict">Excellent</div>
-            </div>
+            <div id="dewVerdict" class="verdict">Объектив в безопасности</div>
         </div>
-    </div>
-
-    <!-- БЛОК 4: РАДАР ЛОКАЦИЙ -->
-    <h2 class="section-title">Астро-Радар</h2>
-    <div class="control-group">
-        <div class="radar-container">
-            <canvas id="radarCanvas" width="240" height="240"></canvas>
-        </div>
-        <div class="result-box" style="padding: 12px; margin-top: 15px;">
-            <div id="radarResult" class="verdict" style="margin:0; font-size: 11px;">ГОТОВ К СКАНИРОВАНИЮ</div>
-        </div>
-        <button class="btn-action" id="scanBtn" onclick="startScan()">📡 Поиск локаций (SIM)</button>
-    </div>
-
-    <!-- БЛОК 2: ВЫДЕРЖКА -->
-    <h2 class="section-title">Астро Выдержка</h2>
-    <div class="control-group">
-        <label class="header-flex"><span>Система / Матрица</span><span></span></label>
-        <select id="cameraProfile" onchange="updateProfile()">
-            <option value="nikon_z_fx">Nikon Z (FX) - Full Frame</option>
-            <option value="nikon_z_dx">Nikon Z (DX) - APS-C</option>
-            <option value="fujifilm_x_apsc" selected>Fujifilm X - APS-C</option>
-            <option value="sony_e_ff">Sony E - Full Frame</option>
-            <option value="sony_e_apsc">Sony E - APS-C</option>
-            <option value="canon_rf_ff">Canon RF - Full Frame</option>
-            <option value="canon_rf_apsc">Canon RF - APS-C</option>
-            <option value="ricoh_gr_apsc">Ricoh GR - APS-C</option>
-            <option value="leica_l_ff">Leica L - Full Frame</option>
-            <option value="leica_m_ff">Leica M - Full Frame</option>
-            <option value="leica_q_ff">Leica Q - Full Frame</option>
-        </select>
-        <br>
-        <div class="header-flex">
-            <span>Разрешение</span>
-            <span><input type="text" inputmode="decimal" id="mpNum" class="num-input" value="26" onclick="this.select()" oninput="document.getElementById('mp').value = this.value; calculateShutter();"> Мп</span>
-        </div>
-        <input type="range" id="mp" min="10" max="100" value="26" oninput="document.getElementById('mpNum').value = this.value; calculateShutter();">
-    </div>
-
-    <div class="control-group">
-        <div class="header-flex">
-            <span>Фокусное</span>
-            <span><input type="text" inputmode="decimal" id="focalNum" class="num-input" value="16" onclick="this.select()" oninput="document.getElementById('focal').value = this.value; calculateShutter();"> мм</span>
-        </div>
-        <input type="range" id="focal" min="10" max="400" value="16" oninput="document.getElementById('focalNum').value = this.value; calculateShutter();">
-        <br><br>
-        
-        <div class="header-flex">
-            <span>Диафрагма (f/)</span>
-            <span><input type="text" inputmode="decimal" id="apertureNum" class="num-input" value="2.8" onclick="this.select()" oninput="document.getElementById('aperture').value = this.value; calculateShutter();"></span>
-        </div>
-        <input type="range" id="aperture" min="1.2" max="8.0" step="0.1" value="2.8" oninput="document.getElementById('apertureNum').value = this.value; calculateShutter();">
-    </div>
-
-    <div class="result-box">
-        <div class="flex-row">
-            <div class="flex-col">
-                <div class="val-label">Шаг пикселя</div>
-                <div id="pixelPitchDisplay" class="val-big" style="opacity:0.7">0 мкм</div>
-            </div>
-            <div class="flex-col">
-                <div class="val-label">Коэффициент K</div>
-                <div id="kFactorDisplay" class="val-big" style="opacity:0.7">0</div>
-            </div>
-        </div>
-        <div class="flex-row" style="margin-top: 15px;">
-            <div class="flex-col">
-                <div class="val-label">Макс. выдержка без смаза</div>
-                <div id="shutterMax" class="val-big" style="color: var(--accent-color)">0s</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- БЛОК 3: ТОЧКА РОСЫ -->
-    <h2 class="section-title">Роса и Запотевание</h2>
-    <div class="control-group">
-        <div class="header-flex">
-            <span>Температура (°C)</span>
-            <span><input type="text" inputmode="decimal" id="tempNum" class="num-input" value="15" onclick="this.select()" oninput="document.getElementById('temp').value = this.value; calculateDew();"></span>
-        </div>
-        <input type="range" id="temp" min="-20" max="40" value="15" oninput="document.getElementById('tempNum').value = this.value; calculateDew();">
-        <br><br>
-        
-        <div class="header-flex">
-            <span>Влажность (%)</span>
-            <span><input type="text" inputmode="decimal" id="humNum" class="num-input" value="75" onclick="this.select()" oninput="document.getElementById('hum').value = this.value; calculateDew();"></span>
-        </div>
-        <input type="range" id="hum" min="20" max="100" value="75" oninput="document.getElementById('humNum').value = this.value; calculateDew();">
-    </div>
-    
-    <div class="result-box">
-        <div class="flex-row">
-            <div class="flex-col">
-                <div class="val-label">Точка росы</div>
-                <div id="dewDisplay" class="val-big">10.6°C</div>
-            </div>
-        </div>
-        <div id="dewVerdict" class="verdict">Объектив в безопасности</div>
     </div>
 
     <div style="height: 50px;"></div>
@@ -294,16 +330,28 @@
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
 
+        // --- Вкладки ---
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+            
+            // Если перешли на вкладку выдержки, нужно обновить канвас смаза под ее размер
+            if(tabId === 'tab-shutter') {
+                setTimeout(initTrails, 50); 
+            }
+        }
+
         let isRedMode = false;
         function toggleRedMode() {
             isRedMode = !isRedMode;
             document.body.classList.toggle('red-mode', isRedMode);
             document.getElementById('btnRed').innerText = isRedMode ? "⚪ Normal" : "🔴 Night";
-            calculate(); 
-            calculateDew();
+            calculate(); calculateDew(); drawStarTrails();
         }
 
-        // --- BACKGROUND STARS ---
+        // --- ФОН ЗВЕЗДНОГО НЕБА ---
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d', { alpha: false }); 
         let stars = [], milkyWayStars = [], nebulas = [];
@@ -327,20 +375,16 @@
             canvas.width = window.innerWidth * 1.5; 
             canvas.height = window.innerHeight * 1.5;
             stars = []; milkyWayStars = []; nebulas = [];
-            
             for(let i=0; i<40; i++) { 
                 let x = canvas.width/2 + (Math.random()-0.5)*canvas.width*0.8;
                 let y = canvas.height/2 + (Math.random()-0.5)*canvas.height*0.3;
                 let r = Math.random()*300+100;
-                
                 let gradNormal = ctx.createRadialGradient(x, y, 0, x, y, r);
                 gradNormal.addColorStop(0, `rgba(${30+Math.random()*20}, ${30+Math.random()*40}, ${80+Math.random()*50}, 1)`);
                 gradNormal.addColorStop(1, 'transparent');
-                
                 let gradRed = ctx.createRadialGradient(x, y, 0, x, y, r);
                 gradRed.addColorStop(0, `rgba(255, 0, 0, 1)`);
                 gradRed.addColorStop(1, 'transparent');
-
                 nebulas.push({ x, y, r, gradNormal, gradRed, a: 0.03+Math.random()*0.02 });
             }
             for(let i=0; i<1500; i++) milkyWayStars.push({ x: canvas.width/2 + (Math.random()-0.5)*canvas.width*0.7, y: canvas.height/2 + (Math.random()-0.5)*canvas.height*0.25, s: Math.random()*0.8+0.5, a: Math.random()*0.5 });
@@ -373,7 +417,7 @@
             requestAnimationFrame(drawSpace);
         }
 
-        // --- MATH CALCULATORS ---
+        // --- ЛОГИКА КАЛЬКУЛЯТОРОВ ---
         function calculate() {
             let c = parseInt(document.getElementById('cloudsNum').value) || 0;
             let v = parseInt(document.getElementById('visNum').value) || 0;
@@ -403,25 +447,24 @@
             let focal = Math.max(1, parseFloat(document.getElementById('focalNum').value) || 16);
             let mp = Math.max(1, parseFloat(document.getElementById('mpNum').value) || profile.mp);
             let aspectRatio = 3.0 / 2.0;
-            let pixelsTotal = mp * 1000000.0;
-            let widthPx = Math.sqrt(pixelsTotal * aspectRatio);
-            let pitchMm = profile.width / widthPx;
-            let pitchUm = pitchMm * 1000.0;
+            let widthPx = Math.sqrt((mp * 1000000.0) * aspectRatio);
+            let pitchUm = (profile.width / widthPx) * 1000.0;
 
             document.getElementById('pixelPitchDisplay').innerText = pitchUm.toFixed(2) + ' мкм';
             let k = 600;
             if (pitchUm <= 4.0) k = 300;
             else if (pitchUm <= 5.0) k = 400;
             else if (pitchUm <= 6.0) k = 500;
-            document.getElementById('kFactorDisplay').innerText = k;
 
             let maxExposure = k / (focal * profile.crop);
-            maxExposure = Math.max(1.0, Math.min(maxExposure, 40.0)); 
+            maxExposure = Math.max(1.0, Math.min(maxExposure, 60.0)); 
             document.getElementById('shutterMax').innerText = maxExposure.toFixed(1) + 's';
 
             let scale = focal / 16; 
             if(scale < 0.6) scale = 0.6; if(scale > 3) scale = 3; 
             document.getElementById('skyContainer').style.transform = `scale(${scale})`;
+
+            drawStarTrails(); // Обновляем канвас смаза
         }
 
         function calculateDew() {
@@ -433,25 +476,113 @@
             
             let diff = T - dp;
             let verd = document.getElementById('dewVerdict');
-            if (diff <= 2) { verd.innerText = "ВНИМАНИЕ: Опасность росы!"; verd.style.color = 'var(--bad-color)'; }
+            if (diff <= 2) { verd.innerText = "Опасность росы!"; verd.style.color = 'var(--bad-color)'; }
             else if (diff <= 4) { verd.innerText = "Риск запотевания"; verd.style.color = 'var(--warn-color)'; }
-            else { verd.innerText = "Объектив в безопасности"; verd.style.color = 'var(--good-color)'; }
+            else { verd.innerText = "В безопасности"; verd.style.color = 'var(--good-color)'; }
         }
 
-        // --- RADAR ANIMATION ---
+        // --- ИНТЕРАКТИВНЫЙ СМАЗ ЗВЕЗД ---
+        let trailCanvas = document.getElementById('trailCanvas');
+        let trailCtx = trailCanvas.getContext('2d');
+        let tStars = [];
+
+        function initTrails() {
+            // Подгоняем реальный размер канваса под CSS
+            trailCanvas.width = trailCanvas.clientWidth;
+            trailCanvas.height = trailCanvas.clientHeight;
+            tStars = [];
+            // Центр вращения (полярная звезда) пусть будет чуть левее и ниже центра
+            let cx = trailCanvas.width * 0.3;
+            let cy = trailCanvas.height * 0.8;
+            
+            for(let i=0; i<60; i++) {
+                let x = Math.random() * trailCanvas.width;
+                let y = Math.random() * trailCanvas.height;
+                let dx = x - cx; let dy = y - cy;
+                tStars.push({
+                    x: x, y: y,
+                    dist: Math.sqrt(dx*dx + dy*dy),
+                    angle: Math.atan2(dy, dx),
+                    s: Math.random() * 1.5 + 0.5,
+                    cx: cx, cy: cy
+                });
+            }
+            drawStarTrails();
+        }
+
+        function drawStarTrails() {
+            if(!trailCanvas.width) return;
+            trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+            
+            let maxExp = parseFloat(document.getElementById('shutterMax').innerText) || 10;
+            let currentExp = parseFloat(document.getElementById('testExpNum').value) || 15;
+            let focal = parseFloat(document.getElementById('focalNum').value) || 16;
+            
+            // Если выдержка больше идеала, считаем фактор смаза
+            let overExposure = Math.max(0, currentExp - maxExp);
+            // Чем больше фокусное, тем заметнее смаз при той же ошибке
+            let stretchFactor = overExposure * (focal / 20) * 0.002; 
+
+            trailCtx.fillStyle = isRedMode ? '#ff4444' : '#ffffff';
+            trailCtx.strokeStyle = isRedMode ? '#ff4444' : '#ffffff';
+            trailCtx.lineCap = "round";
+
+            tStars.forEach(star => {
+                trailCtx.globalAlpha = 0.8 + (Math.random()*0.2);
+                
+                if (stretchFactor > 0.001) {
+                    // Рисуем дугу (трек)
+                    let endAngle = star.angle + stretchFactor;
+                    let ex = star.cx + Math.cos(endAngle) * star.dist;
+                    let ey = star.cy + Math.sin(endAngle) * star.dist;
+                    
+                    trailCtx.beginPath();
+                    trailCtx.lineWidth = star.s;
+                    trailCtx.moveTo(star.x, star.y);
+                    trailCtx.lineTo(ex, ey);
+                    trailCtx.stroke();
+                } else {
+                    // Рисуем точку
+                    trailCtx.beginPath();
+                    trailCtx.arc(star.x, star.y, star.s, 0, Math.PI*2);
+                    trailCtx.fill();
+                }
+            });
+        }
+
+        // --- РАДАР ---
         const rCanvas = document.getElementById('radarCanvas');
         const rCtx = rCanvas.getContext('2d');
         let radarAngle = 0;
         let isScanning = false;
         let scanSpeed = 0.05;
-        let spots = [];
+        let rSpots = [];
         let rWidth = rCanvas.width, rHeight = rCanvas.height;
         let rCenter = rWidth / 2;
 
+        async function startScan() {
+            if(isScanning) return;
+            // Имитация связи с сервером
+            isScanning = true; radarAngle = 0; scanSpeed = 0.15; rSpots = [];
+            let btn = document.getElementById('scanBtn');
+            let res = document.getElementById('radarResult');
+            btn.innerText = "СКАНИРОВАНИЕ..."; btn.style.opacity = "0.5";
+            res.innerText = "Связь со спутниками..."; res.style.color = "var(--text-color)";
+
+            setTimeout(() => {
+                isScanning = false;
+                btn.innerText = "📡 Обновить радар"; btn.style.opacity = "1";
+                let angle = Math.random() * Math.PI * 2;
+                let dist = Math.random() * (rCenter * 0.8) + (rCenter * 0.2);
+                rSpots.push({ x: Math.cos(angle) * dist, y: Math.sin(angle) * dist, good: true });
+                res.innerText = `ТОП ЛОКАЦИЯ: Азимут ${(angle * 180 / Math.PI).toFixed(0)}° | Astro-Score: ${(Math.random() * 2 + 8).toFixed(1)}/10`;
+                res.style.color = isRedMode ? "var(--good-color)" : "var(--good-color)";
+                if (window.Telegram.WebApp.HapticFeedback) window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+            }, 2500);
+        }
+
         function drawRadar() {
             rCtx.clearRect(0, 0, rWidth, rHeight);
-            
-            // Сетка радара
             rCtx.strokeStyle = isRedMode ? 'rgba(255, 0, 0, 0.3)' : 'rgba(143, 182, 255, 0.3)';
             rCtx.lineWidth = 1;
             rCtx.beginPath();
@@ -462,86 +593,38 @@
             rCtx.moveTo(0, rCenter); rCtx.lineTo(rWidth, rCenter);
             rCtx.stroke();
 
-            // Точки
-            spots.forEach(spot => {
+            rSpots.forEach(spot => {
                 rCtx.beginPath();
                 rCtx.arc(rCenter + spot.x, rCenter + spot.y, 4, 0, Math.PI * 2);
                 rCtx.fillStyle = spot.good ? (isRedMode ? '#ff0000' : '#00ffaa') : (isRedMode ? '#aa0000' : '#ff4444');
                 rCtx.fill();
-                rCtx.shadowBlur = 10;
-                rCtx.shadowColor = rCtx.fillStyle;
-                rCtx.fill();
-                rCtx.shadowBlur = 0;
+                rCtx.shadowBlur = 10; rCtx.shadowColor = rCtx.fillStyle; rCtx.fill(); rCtx.shadowBlur = 0;
             });
 
-            // Луч радара
             if (isScanning) {
                 rCtx.save();
                 rCtx.translate(rCenter, rCenter);
                 rCtx.rotate(radarAngle);
                 rCtx.beginPath();
                 rCtx.moveTo(0, 0);
-                rCtx.arc(0, 0, rCenter, 0, 0.3); // Ширина луча
+                rCtx.arc(0, 0, rCenter, 0, 0.3); 
                 rCtx.closePath();
                 let grad = rCtx.createRadialGradient(0,0,0, 0,0,rCenter);
                 grad.addColorStop(0, isRedMode ? 'rgba(255,0,0,0.5)' : 'rgba(143,182,255,0.5)');
                 grad.addColorStop(1, 'rgba(0,0,0,0)');
-                rCtx.fillStyle = grad;
-                rCtx.fill();
+                rCtx.fillStyle = grad; rCtx.fill();
                 rCtx.restore();
-                
                 radarAngle += scanSpeed;
-                if (scanSpeed > 0.01) scanSpeed *= 0.99; // Замедление вращения
+                if (scanSpeed > 0.01) scanSpeed *= 0.99; 
             }
-
             requestAnimationFrame(drawRadar);
         }
 
-        function startScan() {
-            if(isScanning) return;
-            isScanning = true;
-            radarAngle = 0;
-            scanSpeed = 0.15; // Быстрый старт
-            spots = []; // Очистка старых точек
-            
-            let btn = document.getElementById('scanBtn');
-            let res = document.getElementById('radarResult');
-            btn.innerText = "СКАНИРОВАНИЕ...";
-            btn.style.opacity = "0.5";
-            res.innerText = "Анализ погодных моделей...";
-            res.style.color = "var(--text-color)";
-
-            // Имитация задержки сети и расчета
-            setTimeout(() => {
-                isScanning = false;
-                btn.innerText = "📡 Повторить поиск";
-                btn.style.opacity = "1";
-                
-                // Генерация случайной хорошей точки
-                let angle = Math.random() * Math.PI * 2;
-                let dist = Math.random() * (rCenter * 0.8) + (rCenter * 0.2);
-                spots.push({
-                    x: Math.cos(angle) * dist,
-                    y: Math.sin(angle) * dist,
-                    good: true
-                });
-
-                res.innerText = `Найдена точка! Азимут: ${(angle * 180 / Math.PI).toFixed(0)}°, Astro-Score: ${(Math.random() * 2 + 8).toFixed(1)}`;
-                res.style.color = isRedMode ? "var(--good-color)" : "var(--good-color)";
-
-                // Телеграм-вибрация (если поддерживается)
-                if (window.Telegram.WebApp.HapticFeedback) {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-                }
-            }, 2500);
-        }
-
-        // Init all
-        window.addEventListener('resize', initSpace);
-        initSpace(); 
-        drawSpace(); 
-        drawRadar();
+        // Init
+        window.addEventListener('resize', () => { initSpace(); initTrails(); });
+        initSpace(); drawSpace(); drawRadar(); 
         calculate(); calculateShutter(); calculateDew();
+        setTimeout(initTrails, 100); // Ожидаем рендера DOM для правильной ширины канваса
     </script>
 </body>
 </html>
