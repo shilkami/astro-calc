@@ -40,7 +40,6 @@
             transition: all 0.5s ease;
         }
 
-        /* Принудительно разрешаем фокус и выделение в Telegram WebApp */
         input, select, textarea {
             -webkit-user-select: auto !important;
             user-select: auto !important;
@@ -173,21 +172,29 @@
         </div>
     </div>
 
-    <!-- БЛОК 2: ВЫДЕРЖКА NPF -->
-    <h2 class="section-title">Калькулятор NPF</h2>
+    <!-- БЛОК 2: ВЫДЕРЖКА -->
+    <h2 class="section-title">Астро Выдержка</h2>
     <div class="control-group">
-        <label class="header-flex"><span>Матрица камеры</span><span></span></label>
-        <select id="crop" oninput="calculateShutter()">
-            <option value="1.0">Full Frame (1.0x)</option>
-            <option value="1.5" selected>APS-C Fuji/Nikon (1.5x)</option>
-            <option value="2.0">Micro 4/3 (2.0x)</option>
+        <label class="header-flex"><span>Система / Матрица</span><span></span></label>
+        <select id="cameraProfile" onchange="updateProfile()">
+            <option value="nikon_z_fx">Nikon Z (FX) - Full Frame</option>
+            <option value="nikon_z_dx">Nikon Z (DX) - APS-C</option>
+            <option value="fujifilm_x_apsc" selected>Fujifilm X - APS-C</option>
+            <option value="sony_e_ff">Sony E - Full Frame</option>
+            <option value="sony_e_apsc">Sony E - APS-C</option>
+            <option value="canon_rf_ff">Canon RF - Full Frame</option>
+            <option value="canon_rf_apsc">Canon RF - APS-C</option>
+            <option value="ricoh_gr_apsc">Ricoh GR - APS-C</option>
+            <option value="leica_l_ff">Leica L - Full Frame</option>
+            <option value="leica_m_ff">Leica M - Full Frame</option>
+            <option value="leica_q_ff">Leica Q - Full Frame</option>
         </select>
         <br>
         <div class="header-flex">
-            <span>Мегапиксели</span>
-            <span><input type="text" inputmode="decimal" id="mpNum" class="num-input" value="24" onclick="this.select()" oninput="document.getElementById('mp').value = this.value; calculateShutter();"> Мп</span>
+            <span>Разрешение</span>
+            <span><input type="text" inputmode="decimal" id="mpNum" class="num-input" value="26" onclick="this.select()" oninput="document.getElementById('mp').value = this.value; calculateShutter();"> Мп</span>
         </div>
-        <input type="range" id="mp" min="12" max="61" value="24" oninput="document.getElementById('mpNum').value = this.value; calculateShutter();">
+        <input type="range" id="mp" min="10" max="100" value="26" oninput="document.getElementById('mpNum').value = this.value; calculateShutter();">
     </div>
 
     <div class="control-group">
@@ -195,7 +202,7 @@
             <span>Фокусное</span>
             <span><input type="text" inputmode="decimal" id="focalNum" class="num-input" value="16" onclick="this.select()" oninput="document.getElementById('focal').value = this.value; calculateShutter();"> мм</span>
         </div>
-        <input type="range" id="focal" min="10" max="85" value="16" oninput="document.getElementById('focalNum').value = this.value; calculateShutter();">
+        <input type="range" id="focal" min="10" max="400" value="16" oninput="document.getElementById('focalNum').value = this.value; calculateShutter();">
         <br><br>
         
         <div class="header-flex">
@@ -208,12 +215,18 @@
     <div class="result-box">
         <div class="flex-row">
             <div class="flex-col">
-                <div class="val-label">Правило 500</div>
-                <div id="shutter500" class="val-big" style="opacity:0.7">20.8s</div>
+                <div class="val-label">Шаг пикселя</div>
+                <div id="pixelPitchDisplay" class="val-big" style="opacity:0.7">0 мкм</div>
             </div>
             <div class="flex-col">
-                <div class="val-label">Правило NPF (Идеал)</div>
-                <div id="shutterNPF" class="val-big" style="color: var(--accent-color)">11.5s</div>
+                <div class="val-label">Коэффициент K</div>
+                <div id="kFactorDisplay" class="val-big" style="opacity:0.7">0</div>
+            </div>
+        </div>
+        <div class="flex-row" style="margin-top: 15px;">
+            <div class="flex-col">
+                <div class="val-label">Макс. выдержка без смаза</div>
+                <div id="shutterMax" class="val-big" style="color: var(--accent-color)">0s</div>
             </div>
         </div>
     </div>
@@ -264,6 +277,21 @@
         const ctx = canvas.getContext('2d', { alpha: false }); 
         let stars = [], milkyWayStars = [], nebulas = [];
         const starColors = ['#ffffff', '#fff4ea', '#eaf4ff', '#fff9e5'];
+
+        // База профилей из Python
+        const cameraProfiles = {
+            "nikon_z_fx": { width: 36.0, crop: 1.0, mp: 24 },
+            "nikon_z_dx": { width: 23.5, crop: 1.5, mp: 20 },
+            "fujifilm_x_apsc": { width: 23.5, crop: 1.5, mp: 26 },
+            "sony_e_ff": { width: 35.9, crop: 1.0, mp: 33 },
+            "sony_e_apsc": { width: 23.5, crop: 1.5, mp: 24 },
+            "canon_rf_ff": { width: 36.0, crop: 1.0, mp: 24 },
+            "canon_rf_apsc": { width: 22.3, crop: 1.6, mp: 24 },
+            "ricoh_gr_apsc": { width: 23.7, crop: 1.5, mp: 24 },
+            "leica_l_ff": { width: 36.0, crop: 1.0, mp: 47 },
+            "leica_m_ff": { width: 36.0, crop: 1.0, mp: 40 },
+            "leica_q_ff": { width: 36.0, crop: 1.0, mp: 47 }
+        };
 
         function initSpace() {
             canvas.width = window.innerWidth * 1.5; 
@@ -339,23 +367,46 @@
             else { res.style.color = 'var(--bad-color)'; verd.innerText = "Poor"; }
         }
 
+        // Обновление мегапикселей при смене системы
+        function updateProfile() {
+            let key = document.getElementById('cameraProfile').value;
+            let profile = cameraProfiles[key];
+            document.getElementById('mpNum').value = profile.mp;
+            document.getElementById('mp').value = profile.mp;
+            calculateShutter();
+        }
+
         function calculateShutter() {
-            let crop = parseFloat(document.getElementById('crop').value);
+            let key = document.getElementById('cameraProfile').value;
+            let profile = cameraProfiles[key];
+
             let focal = Math.max(1, parseFloat(document.getElementById('focalNum').value) || 16);
-            let mp = Math.max(1, parseFloat(document.getElementById('mpNum').value) || 24);
-            // Если поле пустое, подставляем дефолтное, чтобы избежать ошибки деления
-            let apertureStr = document.getElementById('apertureNum').value;
-            let aperture = parseFloat(apertureStr.replace(',', '.')) || 2.8; 
+            let mp = Math.max(1, parseFloat(document.getElementById('mpNum').value) || profile.mp);
+            
+            // Расчет физического размера пикселя (мкм)
+            let aspectRatio = 3.0 / 2.0;
+            let pixelsTotal = mp * 1000000.0;
+            let widthPx = Math.sqrt(pixelsTotal * aspectRatio);
+            let pitchMm = profile.width / widthPx;
+            let pitchUm = pitchMm * 1000.0;
 
-            let rule500 = 500 / (focal * crop);
-            document.getElementById('shutter500').innerText = rule500.toFixed(1) + 's';
+            document.getElementById('pixelPitchDisplay').innerText = pitchUm.toFixed(2) + ' мкм';
 
-            let width = crop == 1.0 ? 36 : (crop == 1.5 ? 23.6 : 17.3);
-            let height = crop == 1.0 ? 24 : (crop == 1.5 ? 15.6 : 13.0);
-            let pixelPitch = Math.sqrt((width * height) / (mp * 1000000)) * 1000;
-            let npf = (35 * aperture + 30 * pixelPitch) / focal;
-            document.getElementById('shutterNPF').innerText = npf.toFixed(1) + 's';
+            // Определение динамического коэффициента K
+            let k = 600;
+            if (pitchUm <= 4.0) k = 300;
+            else if (pitchUm <= 5.0) k = 400;
+            else if (pitchUm <= 6.0) k = 500;
 
+            document.getElementById('kFactorDisplay').innerText = k;
+
+            // Расчет максимальной выдержки
+            let maxExposure = k / (focal * profile.crop);
+            maxExposure = Math.max(1.0, Math.min(maxExposure, 40.0)); // Ограничение от 1s до 40s
+
+            document.getElementById('shutterMax').innerText = maxExposure.toFixed(1) + 's';
+
+            // Зум звездного неба
             let scale = focal / 16; 
             if(scale < 0.6) scale = 0.6; 
             if(scale > 3) scale = 3; 
