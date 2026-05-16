@@ -337,7 +337,7 @@
             document.getElementById(tabId).classList.add('active');
             btnElement.classList.add('active');
             
-            // Если перешли на вкладку выдержки, нужно обновить канвас смаза под ее размер
+            // Обновляем канвас выдержки при переключении
             if(tabId === 'tab-shutter') {
                 setTimeout(initTrails, 50); 
             }
@@ -351,10 +351,10 @@
             calculate(); calculateDew(); drawStarTrails();
         }
 
-        // --- ФОН ЗВЕЗДНОГО НЕБА ---
+        // --- ФОН ЗВЕЗДНОГО НЕБА С ПРОДВИНУТОЙ ПОГОДОЙ ---
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d', { alpha: false }); 
-        let stars = [], milkyWayStars = [], nebulas = [];
+        let stars = [], milkyWayStars = [], nebulas = [], cloudParticles = [];
         const starColors = ['#ffffff', '#fff4ea', '#eaf4ff', '#fff9e5'];
 
         const cameraProfiles = {
@@ -374,7 +374,8 @@
         function initSpace() {
             canvas.width = window.innerWidth * 1.5; 
             canvas.height = window.innerHeight * 1.5;
-            stars = []; milkyWayStars = []; nebulas = [];
+            stars = []; milkyWayStars = []; nebulas = []; cloudParticles = [];
+            
             for(let i=0; i<40; i++) { 
                 let x = canvas.width/2 + (Math.random()-0.5)*canvas.width*0.8;
                 let y = canvas.height/2 + (Math.random()-0.5)*canvas.height*0.3;
@@ -389,31 +390,79 @@
             }
             for(let i=0; i<1500; i++) milkyWayStars.push({ x: canvas.width/2 + (Math.random()-0.5)*canvas.width*0.7, y: canvas.height/2 + (Math.random()-0.5)*canvas.height*0.25, s: Math.random()*0.8+0.5, a: Math.random()*0.5 });
             for(let i=0; i<800; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.5, c: starColors[Math.floor(Math.random()*starColors.length)], a: Math.random(), sc: Math.random()*0.02+0.005, d: Math.random()>0.5?1:-1 });
+
+            // Генерация силуэтов туч для анимации облачности
+            for(let i=0; i<30; i++) {
+                cloudParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 300 + 100,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 0.5
+                });
+            }
         }
 
         function drawSpace() {
             ctx.fillStyle = isRedMode ? '#050000' : '#02040a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             let v = parseInt(document.getElementById('visNum').value) || 0;
             let c = parseInt(document.getElementById('cloudsNum').value) || 0;
-            let purity = Math.max(0, (1 - c/100) * (v/24000));
-
+            
+            // 1. Считаем прозрачность дальнего космоса
+            let deepPurity = Math.max(0, (1 - c/100) * (v/24000));
+            
             ctx.globalCompositeOperation = 'screen';
             nebulas.forEach(n => {
-                ctx.globalAlpha = n.a * purity; 
+                ctx.globalAlpha = n.a * deepPurity; 
                 ctx.fillStyle = isRedMode ? n.gradRed : n.gradNormal;
                 ctx.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2); 
             });
 
             ctx.globalCompositeOperation = 'source-over';
             ctx.fillStyle = isRedMode ? `rgba(255,50,50,1)` : `rgba(255,255,255,1)`;
-            milkyWayStars.forEach(s => { ctx.globalAlpha = s.a * purity; ctx.fillRect(s.x, s.y, s.s, s.s); });
+            milkyWayStars.forEach(s => { 
+                ctx.globalAlpha = s.a * deepPurity; 
+                ctx.fillRect(s.x, s.y, s.s, s.s); 
+            });
+
+            // 2. Звёзды (чуть меньше зависят от тумана, чтобы был объём)
+            let starPurity = Math.max(0, (1 - c/100) * Math.pow(v/24000, 0.5));
             stars.forEach(s => {
                 s.a += s.sc*s.d; if(s.a>=1 || s.a<=0.3) s.d*=-1;
-                ctx.globalAlpha = s.a * purity; 
+                ctx.globalAlpha = s.a * starPurity; 
                 ctx.fillStyle = isRedMode ? '#ff4444' : s.c;
                 ctx.fillRect(s.x, s.y, s.r * 2, s.r * 2);
             });
+
+            // 3. Рендерим туман/дымку от низкой видимости
+            if (v < 24000) {
+                let fogDensity = 1 - (v / 24000);
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = isRedMode ? `rgba(80, 0, 0, ${fogDensity * 0.85})` : `rgba(60, 70, 90, ${fogDensity * 0.85})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 4. Рендерим плывущие облака
+            if (c > 0) {
+                ctx.globalAlpha = c / 100; // Чем больше ползунок облаков, тем они плотнее
+                ctx.fillStyle = isRedMode ? '#1a0505' : '#0a0d14'; // Тёмные силуэты
+                ctx.beginPath();
+                cloudParticles.forEach(cp => {
+                    cp.x += cp.vx; cp.y += cp.vy;
+                    // Оборачивание вокруг экрана
+                    if(cp.x > canvas.width + cp.r) cp.x = -cp.r;
+                    if(cp.x < -cp.r) cp.x = canvas.width + cp.r;
+                    if(cp.y > canvas.height + cp.r) cp.y = -cp.r;
+                    if(cp.y < -cp.r) cp.y = canvas.height + cp.r;
+
+                    ctx.moveTo(cp.x, cp.y);
+                    ctx.arc(cp.x, cp.y, cp.r, 0, Math.PI*2);
+                });
+                ctx.fill();
+            }
+
             requestAnimationFrame(drawSpace);
         }
 
@@ -487,11 +536,9 @@
         let tStars = [];
 
         function initTrails() {
-            // Подгоняем реальный размер канваса под CSS
             trailCanvas.width = trailCanvas.clientWidth;
             trailCanvas.height = trailCanvas.clientHeight;
             tStars = [];
-            // Центр вращения (полярная звезда) пусть будет чуть левее и ниже центра
             let cx = trailCanvas.width * 0.3;
             let cy = trailCanvas.height * 0.8;
             
@@ -518,9 +565,7 @@
             let currentExp = parseFloat(document.getElementById('testExpNum').value) || 15;
             let focal = parseFloat(document.getElementById('focalNum').value) || 16;
             
-            // Если выдержка больше идеала, считаем фактор смаза
             let overExposure = Math.max(0, currentExp - maxExp);
-            // Чем больше фокусное, тем заметнее смаз при той же ошибке
             let stretchFactor = overExposure * (focal / 20) * 0.002; 
 
             trailCtx.fillStyle = isRedMode ? '#ff4444' : '#ffffff';
@@ -531,7 +576,6 @@
                 trailCtx.globalAlpha = 0.8 + (Math.random()*0.2);
                 
                 if (stretchFactor > 0.001) {
-                    // Рисуем дугу (трек)
                     let endAngle = star.angle + stretchFactor;
                     let ex = star.cx + Math.cos(endAngle) * star.dist;
                     let ey = star.cy + Math.sin(endAngle) * star.dist;
@@ -542,7 +586,6 @@
                     trailCtx.lineTo(ex, ey);
                     trailCtx.stroke();
                 } else {
-                    // Рисуем точку
                     trailCtx.beginPath();
                     trailCtx.arc(star.x, star.y, star.s, 0, Math.PI*2);
                     trailCtx.fill();
@@ -562,7 +605,6 @@
 
         async function startScan() {
             if(isScanning) return;
-            // Имитация связи с сервером
             isScanning = true; radarAngle = 0; scanSpeed = 0.15; rSpots = [];
             let btn = document.getElementById('scanBtn');
             let res = document.getElementById('radarResult');
@@ -624,7 +666,7 @@
         window.addEventListener('resize', () => { initSpace(); initTrails(); });
         initSpace(); drawSpace(); drawRadar(); 
         calculate(); calculateShutter(); calculateDew();
-        setTimeout(initTrails, 100); // Ожидаем рендера DOM для правильной ширины канваса
+        setTimeout(initTrails, 100); 
     </script>
 </body>
 </html>
