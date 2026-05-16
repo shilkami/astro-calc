@@ -318,7 +318,7 @@
             <br>
             <div class="header-flex">
                 <span>Влажность (%)</span>
-                <span><input type="text" inputmode="decimal" id="humNum" class="num-input" value="75" onclick="this.select()" oninput="document.getElementById('temp').value = this.value; calculateDew();"></span>
+                <span><input type="text" inputmode="decimal" id="humNum" class="num-input" value="75" onclick="this.select()" oninput="document.getElementById('hum').value = this.value; calculateDew();"></span>
             </div>
             <input type="range" id="hum" min="20" max="100" value="75" oninput="document.getElementById('humNum').value = this.value; calculateDew();">
         </div>
@@ -431,7 +431,6 @@
             else { res.style.color = 'var(--bad-color)'; verd.innerText = "Poor"; }
         }
 
-        // Поправлен баг со ссылкой на несуществующий элемент tempNum во влажности
         function calculateDew() {
             let T = parseFloat(document.getElementById('tempNum').value) || 15; 
             let RH = parseFloat(document.getElementById('humNum').value) || 75;
@@ -514,7 +513,6 @@
             let userLat = 47.2357; let userLon = 39.7015;
 
             try {
-                // ИСПОЛЬЗУЕМ АБСОЛЮТНЫЙ URL К СЕРВЕРУ NGROK
                 const response = await fetch(`${BACKEND_URL}/api/radar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -534,23 +532,27 @@
                             x: Math.cos(angleRad) * visualDist,
                             y: Math.sin(angleRad) * visualDist,
                             name: spot.name,
-                            score: spot.score,
+                            score: parseFloat(Number(spot.score).toFixed(1)),
                             type: spot.type
                         });
                     });
 
                     let topSpot = data.spots[0];
+                    // ПРИМЕНЯЕМ ОКРУГЛЕНИЕ ДЛЯ ТЕКСТОВОГО ВЫВОДА
+                    let displayDist = Math.round(topSpot.distance);
+                    let displayScore = parseFloat(Number(topSpot.score).toFixed(1));
+
                     if (currentMode === 'thunderstorm') {
-                        res.innerText = `ВНИМАНИЕ: Ближайшая гроза ${topSpot.name} в ${topSpot.distance} км!`;
+                        res.innerText = `ВНИМАНИЕ: Ближайшая гроза ${topSpot.name} в ${displayDist} км!`;
                         res.style.color = "var(--bad-color)";
                     } else if (currentMode === 'aurora') {
-                        res.innerText = `ОХОТА ЗА СИЯНИЕМ: Kp-индекс равен ${topSpot.score}. Смотри на Север!`;
+                        res.innerText = `ОХОТА ЗА СИЯНИЕМ: Kp-индекс равен ${displayScore}. Смотри на Север!`;
                         res.style.color = "var(--good-color)";
                     } else if (currentMode === 'fog') {
                         res.innerText = `ФРОНТ ТУМАНА: Обнаружены банки влажности в секторе ${topSpot.name}`;
                         res.style.color = "var(--warn-color)";
                     } else {
-                        res.innerText = `УСПЕХ: Найдено темное небо в ${topSpot.name} (Скор: ${topSpot.score}/10)`;
+                        res.innerText = `УСПЕХ: Найдено темное небо в ${topSpot.name} (Скор: ${displayScore}/10)`;
                         res.style.color = "var(--good-color)";
                     }
 
