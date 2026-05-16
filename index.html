@@ -528,17 +528,19 @@
                         let angleRad = (spot.bearing_deg - 90) * Math.PI / 180;
                         let visualDist = spot.distance * 0.6;
 
+                        // СОХРАНЯЕМ КООРДИНАТЫ ДЛЯ ТАПА ПО ЭКРАНУ
                         rSpots.push({
                             x: Math.cos(angleRad) * visualDist,
                             y: Math.sin(angleRad) * visualDist,
                             name: spot.name,
                             score: parseFloat(Number(spot.score).toFixed(1)),
-                            type: spot.type
+                            type: spot.type,
+                            lat: spot.lat, 
+                            lon: spot.lon  
                         });
                     });
 
                     let topSpot = data.spots[0];
-                    // ПРИМЕНЯЕМ ОКРУГЛЕНИЕ ДЛЯ ТЕКСТОВОГО ВЫВОДА
                     let displayDist = Math.round(topSpot.distance);
                     let displayScore = parseFloat(Number(topSpot.score).toFixed(1));
 
@@ -621,6 +623,57 @@
             }
             requestAnimationFrame(drawRadar);
         }
+
+        // --- ОБРАБОТЧИК КЛИКА ПО ТОЧКАМ ДЛЯ КАРТ И НАВИГАТОРА ---
+        rCanvas.addEventListener('click', function(event) {
+            if (rSpots.length === 0) return;
+
+            const rect = rCanvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            const clickRadius = 16; // Зона чувствительности клика (в пикселях)
+
+            rSpots.forEach(spot => {
+                const sx = rCenter + spot.x;
+                const sy = rCenter + spot.y;
+                const distance = Math.sqrt((mouseX - sx) ** 2 + (mouseY - sy) ** 2);
+
+                if (distance <= clickRadius) {
+                    if (spot.lat && spot.lon) {
+                        // Прямая ссылка, открывающая маркер в Яндекс Картах (или в приложении Навигатора)
+                        const yandexMapsUrl = `https://yandex.ru/maps/?text=${spot.lat},${spot.lon}`;
+                        
+                        if (window.Telegram.WebApp.HapticFeedback) {
+                            window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+                        }
+                        
+                        // Открытие внешней ссылки через нативный API Telegram WebApp
+                        window.Telegram.WebApp.openLink(yandexMapsUrl);
+                    } else {
+                        const res = document.getElementById('radarResult');
+                        res.innerText = `ОШИБКА: Нет GPS-координат для ${spot.name}`;
+                        res.style.color = "var(--bad-color)";
+                    }
+                }
+            });
+        });
+
+        // Динамическое изменение курсора мыши при наведении на спот (для ПК)
+        rCanvas.addEventListener('mousemove', function(event) {
+            const rect = rCanvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            let isHoveringSpot = false;
+
+            rSpots.forEach(spot => {
+                const sx = rCenter + spot.x;
+                const sy = rCenter + spot.y;
+                const distance = Math.sqrt((mouseX - sx) ** 2 + (mouseY - sy) ** 2);
+                if (distance <= 16) isHoveringSpot = true;
+            });
+
+            rCanvas.style.cursor = isHoveringSpot ? 'pointer' : 'default';
+        });
 
         window.addEventListener('resize', () => { initSpace(); initTrails(); });
         initSpace(); drawSpace(); drawRadar(); calculate(); calculateShutter(); calculateDew();
