@@ -3,131 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Astro Score</title>
+    <title>Astro-Pro Toolkit</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { margin: 0; background: #050508; color: white; font-family: sans-serif; overflow: hidden; }
-        canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        .ui { padding: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
-        .score-box { text-align: center; margin-top: 50px; }
-        #scoreDisplay { font-size: 80px; font-weight: bold; display: block; }
-        input { width: 100%; margin: 10px 0; }
+        :root {
+            --bg-color: #02040a;
+            --text-color: #ffffff;
+            --accent-color: #8fb6ff;
+            --glass-bg: rgba(10, 15, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --good-color: #00ffaa;
+            --warn-color: #ffcc00;
+            --bad-color: #ff4444;
+        }
+
+        body.red-mode {
+            --bg-color: #050000;
+            --text-color: #ff3333;
+            --accent-color: #ff0000;
+            --glass-bg: rgba(25, 5, 5, 0.6);
+            --glass-border: rgba(255, 0, 0, 0.2);
+            --good-color: #ff3333;
+            --warn-color: #ff0000;
+            --bad-color: #aa0000;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            margin: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        /* Контейнер для зума космоса */
+        #skyContainer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            transform-origin: center center;
+            transition: transform 0.3s ease-out;
+        }
+
+        #starCanvas {
+            position: absolute;
+            top: -100%; left: -100%; width: 300%; height: 300%;
+            animation: rotateSky 1200s linear infinite;
+        }
+
+        @keyframes rotateSky {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, var(--text-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        body.red-mode h2 {
+            background: none;
+            color: var(--accent-color);
+            -webkit-text-fill-color: var(--accent-color);
+        }
+
+        .btn-red {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .section-title { margin-top: 35px; text-align: center; }
+
+        .control-group, .result-box {
+            margin-top: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            transition: all 0.5s ease;
+        }
+
+        .header-flex {
+            display: flex; justify-content: space-between; margin-bottom: 10px;
+            font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        body.red-mode .header-flex { color: rgba(255,0,0,0.6); }
+        .header-flex span:last-child { color: var(--accent-color); font-weight: 600; }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: var(--text-color); cursor: pointer; margin-top: -7px;
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px;
+        }
+        body.red-mode input[type=range]::-webkit-slider-runnable-track { background: rgba(255, 0, 0, 0.2); }
+
+        select {
+            width: 100%; padding: 12px; border-radius: 12px;
+            border: 1px solid var(--glass-border); background-color: rgba(0, 0, 0, 0.3);
+            color: var(--text-color); font-size: 15px; appearance: none;
+        }
+
+        .flex-row { display: flex; gap: 10px; margin-top: 10px; }
+        .flex-col { flex: 1; text-align: center; }
+        .val-big { font-size: 32px; font-weight: 200; margin: 5px 0; color: var(--text-color); }
+        .val-label { font-size: 10px; text-transform: uppercase; opacity: 0.6; }
+        .verdict { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-top: 10px; text-align: center; }
+
     </style>
 </head>
 <body>
 
-<canvas id="skyCanvas"></canvas>
-
-<div class="ui">
-    <div class="score-box">
-        <span id="scoreDisplay">0</span>
-        <div id="verdictDisplay">Analyzing...</div>
+    <div id="skyContainer">
+        <canvas id="starCanvas"></canvas>
     </div>
 
-    <div>Облака: <span id="cloudsVal">0%</span></div>
-    <input type="range" id="clouds" min="0" max="100" value="10" oninput="calculate()">
+    <div class="top-bar">
+        <h2>Astro-Score</h2>
+        <button class="btn-red" onclick="toggleRedMode()" id="btnRed">🔴 Night</button>
+    </div>
 
-    <div>Видимость: <span id="visVal">24 км</span></div>
-    <input type="range" id="vis" min="0" max="24000" value="20000" oninput="calculate()">
+    <!-- БЛОК 1: ПОГОДА -->
+    <div class="control-group">
+        <label class="header-flex"><span>Режим съёмки</span><span></span></label>
+        <select id="mode" oninput="calculate()">
+            <option value="milky_way">🌌 Млечный Путь</option>
+            <option value="landscape">⛰ Ночной пейзаж</option>
+            <option value="deep_sky">🔭 Deep Sky</option>
+        </select>
+    </div>
 
-    <div>Ветер: <span id="windVal">2 м/с</span></div>
-    <input type="range" id="wind" min="0" max="25" value="3" oninput="calculate()">
+    <div class="control-group">
+        <div class="header-flex"><span>Облачность</span><span id="cloudsVal">0%</span></div>
+        <input type="range" id="clouds" min="0" max="100" value="0" oninput="calculate(); drawSpace();">
+        <br><br>
+        <div class="header-flex"><span>Видимость</span><span id="visVal">24 км</span></div>
+        <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="calculate(); drawSpace();">
+    </div>
 
-    <select id="mode" onchange="calculate()">
-        <option value="wide">Wide Field</option>
-        <option value="milky_way">Milky Way</option>
-        <option value="deep_sky">Deep Sky</option>
-    </select>
-</div>
+    <div class="result-box">
+        <div class="flex-row">
+            <div class="flex-col">
+                <div class="val-label">Рейтинг неба</div>
+                <div id="scoreDisplay" class="val-big">10</div>
+            </div>
+            <div class="flex-col" style="display:flex; align-items:center; justify-content:center;">
+                <div id="verdictDisplay" class="verdict">Excellent</div>
+            </div>
+        </div>
+    </div>
 
-<script>
-    const canvas = document.getElementById('skyCanvas');
-    const ctx = canvas.getContext('2d');
+    <!-- БЛОК 2: ВЫДЕРЖКА NPF -->
+    <h2 class="section-title">Калькулятор NPF</h2>
+    <div class="control-group">
+        <label class="header-flex"><span>Матрица камеры</span><span></span></label>
+        <select id="crop" oninput="calculateShutter()">
+            <option value="1.0">Full Frame (1.0x)</option>
+            <option value="1.5" selected>APS-C Fuji/Nikon (1.5x)</option>
+            <option value="2.0">Micro 4/3 (2.0x)</option>
+        </select>
+        <br>
+        <div class="header-flex"><span>Мегапиксели</span><span id="mpVal">24 Мп</span></div>
+        <input type="range" id="mp" min="12" max="61" value="24" oninput="calculateShutter()">
+    </div>
+
+    <div class="control-group">
+        <div class="header-flex"><span>Фокусное (FOV Zoom)</span><span id="focalVal">16 мм</span></div>
+        <input type="range" id="focal" min="10" max="85" value="16" oninput="calculateShutter()">
+        <br><br>
+        <div class="header-flex"><span>Диафрагма</span><span id="apertureVal">f/2.8</span></div>
+        <input type="range" id="aperture" min="1.2" max="8.0" step="0.1" value="2.8" oninput="calculateShutter()">
+    </div>
+
+    <div class="result-box">
+        <div class="flex-row">
+            <div class="flex-col">
+                <div class="val-label">Правило 500</div>
+                <div id="shutter500" class="val-big" style="opacity:0.7">20.8s</div>
+            </div>
+            <div class="flex-col">
+                <div class="val-label">Правило NPF (Идеал)</div>
+                <div id="shutterNPF" class="val-big" style="color: var(--accent-color)">11.5s</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- БЛОК 3: ТОЧКА РОСЫ -->
+    <h2 class="section-title">Роса и Запотевание</h2>
+    <div class="control-group">
+        <div class="header-flex"><span>Температура</span><span id="tempVal">+15°C</span></div>
+        <input type="range" id="temp" min="-20" max="40" value="15" oninput="calculateDew()">
+        <br><br>
+        <div class="header-flex"><span>Влажность</span><span id="humVal">75%</span></div>
+        <input type="range" id="humidity" min="20" max="100" value="75" oninput="calculateDew()">
+    </div>
     
-    // Инициализация размеров
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
+    <div class="result-box">
+        <div class="flex-row">
+            <div class="flex-col">
+                <div class="val-label">Точка росы</div>
+                <div id="dewDisplay" class="val-big">10.6°C</div>
+            </div>
+        </div>
+        <div id="dewVerdict" class="verdict">Объектив в безопасности</div>
+    </div>
 
-    // Заглушки для объектов (чтобы код не падал)
-    let stars = Array.from({length: 100}, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 1.5,
-        alpha: Math.random(),
-        scintillation: Math.random() * 0.02,
-        dir: 1,
-        color: '#fff'
-    }));
-    let nebulas = []; // Можно добавить свои координаты
-    let milkyWayStars = [];
+    <div style="height: 50px;"></div>
 
-    // ТВОЙ КОД DRAWSPACE
-    function drawSpace() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let v = parseInt(document.getElementById('vis').value);
-        let c = parseInt(document.getElementById('clouds').value);
-        let purity = Math.max(0, (1 - c/100) * (v/24000));
+    <script>
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
 
-        ctx.globalCompositeOperation = 'screen';
-        nebulas.forEach(n => {
-            let g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
-            let alphaColor = n.color.replace(/[^,]+(?=\))/, (purity * 0.4).toFixed(3));
-            g.addColorStop(0, alphaColor);
-            g.addColorStop(1, 'transparent');
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(n.x, n.y, n.radius, 0, Math.PI*2);
-            ctx.fill();
-        });
+        let isRedMode = false;
+        function toggleRedMode() {
+            isRedMode = !isRedMode;
+            document.body.classList.toggle('red-mode', isRedMode);
+            document.getElementById('btnRed').innerText = isRedMode ? "⚪ Normal" : "🔴 Night";
+            calculate(); // обновить цвета
+            calculateDew();
+        }
 
-        ctx.globalCompositeOperation = 'source-over';
-        stars.forEach(s => {
-            s.alpha += s.scintillation * s.dir;
-            if(s.alpha >= 1 || s.alpha <= 0.3) s.dir *= -1;
-            ctx.globalAlpha = s.alpha * purity;
-            ctx.fillStyle = s.color;
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
-            ctx.fill();
-        });
+        // ---- КОСМИЧЕСКИЙ ФОН ----
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [], milkyWayStars = [], nebulas = [];
+        const starColors = ['#ffffff', '#fff4ea', '#eaf4ff', '#fff9e5'];
 
-        requestAnimationFrame(drawSpace);
-    }
+        function initSpace() {
+            canvas.width = window.innerWidth * 3;
+            canvas.height = window.innerHeight * 3;
+            stars = []; milkyWayStars = []; nebulas = [];
+            
+            for(let i=0; i<80; i++) {
+                nebulas.push({
+                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.8,
+                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.3,
+                    r: Math.random() * 400 + 100,
+                    red: 30+Math.random()*20, green: 30+Math.random()*40, blue: 80+Math.random()*50,
+                    a: 0.03+Math.random()*0.02
+                });
+            }
+            for(let i=0; i<2500; i++) {
+                milkyWayStars.push({
+                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.7,
+                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.25,
+                    s: Math.random()*0.8, a: Math.random()*0.5
+                });
+            }
+            for(let i=0; i<1000; i++) {
+                stars.push({
+                    x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+                    r: Math.random()*1.2+0.1, c: starColors[Math.floor(Math.random()*starColors.length)],
+                    a: Math.random(), sc: Math.random()*0.02+0.005, d: Math.random()>0.5?1:-1
+                });
+            }
+        }
 
-    // ТВОЙ КОД CALCULATE
-    function calculate() {
-        let m = document.getElementById('mode').value;
-        let c = parseInt(document.getElementById('clouds').value);
-        let v = parseInt(document.getElementById('vis').value);
-        let w = parseInt(document.getElementById('wind').value);
+        function drawSpace() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let v = parseInt(document.getElementById('vis').value);
+            let c = parseInt(document.getElementById('clouds').value);
+            let purity = Math.max(0, (1 - c/100) * (v/24000));
 
-        document.getElementById('cloudsVal').innerText = c + '%';
-        document.getElementById('visVal').innerText = (v / 1000).toFixed(0) + ' км';
-        document.getElementById('windVal').innerText = w + ' м/с';
+            ctx.globalCompositeOperation = 'screen';
+            nebulas.forEach(n => {
+                let g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+                // Если красный режим - красим туманности в чисто красный
+                let rC = isRedMode ? 255 : n.red;
+                let gC = isRedMode ? 0 : n.green;
+                let bC = isRedMode ? 0 : n.blue;
+                g.addColorStop(0, `rgba(${rC}, ${gC}, ${bC}, ${n.a * purity})`);
+                g.addColorStop(1, 'transparent');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+            });
 
-        let score = 10;
-        if (c > 20) score -= 2;
-        if (c > 50) score -= 2;
-        if (v < 8000) score -= 1;
-        if (v < 2000) score -= 5;
-        if (w > 12) score -= 1;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = isRedMode ? `rgba(255,50,50,0.3)` : `rgba(255,255,255,0.3)`;
+            milkyWayStars.forEach(s => {
+                ctx.globalAlpha = s.a * purity;
+                ctx.fillRect(s.x, s.y, s.s, s.s);
+            });
 
-        score = Math.max(0, Math.min(10, score));
-        let res = document.getElementById('scoreDisplay');
-        let verd = document.getElementById('verdictDisplay');
-        res.innerText = score;
-        
-        if (score >= 8) { res.style.color = '#00ffaa'; verd.innerText = "Excellent"; }
-        else if (score >= 5) { res.style.color = '#ffcc00'; verd.innerText = "Fair"; }
-        else { res.style.color = '#ff4444'; verd.innerText = "Poor"; }
-    }
+            stars.forEach(s => {
+                s.a += s.sc * s.d;
+                if(s.a >= 1 || s.a <= 0.3) s.d *= -1;
+                ctx.globalAlpha = s.a * purity;
+                ctx.fillStyle = isRedMode ? '#ff4444' : s.c;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(drawSpace);
+        }
 
-    // Запуск
-    calculate();
-    drawSpace();
-</script>
+        function calculate() {
+            let c = parseInt(document.getElementById('clouds').value);
+            let v = parseInt(document.getElementById('vis').value);
+            document.getElementById('cloudsVal').innerText = c + '%';
+            document.getElementById('visVal').innerText = (v / 1000).toFixed(0) + ' км';
+
+            let score = 10;
+            if (c > 20) score -= 2; if (c > 50) score -= 2;
+            if (v < 8000) score -= 1; if (v < 2000) score -= 5;
+            score = Math.max(0, Math.min(10, score));
+            
+            let res = document.getElementById('scoreDisplay');
+            let verd = document.getElementById('verdictDisplay');
+            res.innerText = score;
+            
+            if (score >= 8) { res.style.color = 'var(--good-color)'; verd.innerText = "Excellent"; }
+            else if (score >= 5) { res.style.color = 'var(--warn-color)'; verd.innerText = "Fair"; }
+            else { res.style.color = 'var(--bad-color)'; verd.innerText = "Poor"; }
+        }
+
+        function calculateShutter() {
+            let crop = parseFloat(document.getElementById('crop').value);
+            let focal = parseInt(document.getElementById('focal').value);
+            let mp = parseInt(document.getElementById('mp').value);
+            let aperture = parseFloat(document.getElementById('aperture').value);
+            
+            document.getElementById('focalVal').innerText = focal + ' мм';
+            document.getElementById('mpVal').innerText = mp + ' Мп';
+            document.getElementById('apertureVal').innerText = 'f/' + aperture.toFixed(1);
+
+            // Правило 500
+            let rule500 = 500 / (focal * crop);
+            document.getElementById('shutter500').innerText = rule500.toFixed(1) + 's';
+
+            // Правило NPF
+            let width = crop == 1.0 ? 36 : (crop == 1.5 ? 23.6 : 17.3);
+            let height = crop == 1.0 ? 24 : (crop == 1.5 ? 15.6 : 13.0);
+            let pixelPitch = Math.sqrt((width * height) / (mp * 1000000)) * 1000; // в микронах
+            let npf = (35 * aperture + 30 * pixelPitch) / focal;
+            document.getElementById('shutterNPF').innerText = npf.toFixed(1) + 's';
+
+            // FOV Симулятор (Зум фона)
+            let scale = focal / 16; 
+            if(scale < 0.6) scale = 0.6; // ограничение отскока
+            document.getElementById('skyContainer').style.transform = `scale(${scale})`;
+        }
+
+        function calculateDew() {
+            let T = parseFloat(document.getElementById('temp').value);
+            let RH = parseFloat(document.getElementById('humidity').value);
+            
+            document.getElementById('tempVal').innerText = (T>0?'+':'') + T + '°C';
+            document.getElementById('humVal').innerText = RH + '%';
+
+            // Формула Магнуса
+            let alpha = (17.27 * T) / (237.7 + T) + Math.log(RH / 100);
+            let dp = (237.7 * alpha) / (17.27 - alpha);
+            document.getElementById('dewDisplay').innerText = (dp>0?'+':'') + dp.toFixed(1) + '°C';
+            
+            let diff = T - dp;
+            let verd = document.getElementById('dewVerdict');
+            if (diff <= 2) { verd.innerText = "ВНИМАНИЕ: Опасность росы!"; verd.style.color = 'var(--bad-color)'; }
+            else if (diff <= 4) { verd.innerText = "Риск запотевания (нужна грелка)"; verd.style.color = 'var(--warn-color)'; }
+            else { verd.innerText = "Объектив в безопасности"; verd.style.color = 'var(--good-color)'; }
+        }
+
+        window.addEventListener('resize', initSpace);
+        initSpace(); drawSpace(); calculate(); calculateShutter(); calculateDew();
+    </script>
 </body>
 </html>
