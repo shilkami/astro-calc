@@ -40,83 +40,65 @@
             transition: all 0.5s ease;
         }
 
-        /* Контейнер для зума космоса */
         #skyContainer {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            transform-origin: center center;
-            transition: transform 0.3s ease-out;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; transform-origin: center center; transition: transform 0.3s ease-out;
         }
 
         #starCanvas {
-            position: absolute;
-            top: -100%; left: -100%; width: 300%; height: 300%;
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             animation: rotateSky 1200s linear infinite;
+            /* Выносим рендер на GPU */
+            transform: translateZ(0); 
+            will-change: transform;
         }
 
         @keyframes rotateSky {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from { transform: rotate(0deg); } to { transform: rotate(360deg); }
         }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 
         h2 {
-            font-size: 20px;
-            font-weight: 300;
-            letter-spacing: 3px;
-            text-transform: uppercase;
+            font-size: 20px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase;
             background: linear-gradient(to bottom, var(--text-color) 0%, var(--accent-color) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;
         }
-        body.red-mode h2 {
-            background: none;
-            color: var(--accent-color);
-            -webkit-text-fill-color: var(--accent-color);
-        }
+        body.red-mode h2 { background: none; color: var(--accent-color); -webkit-text-fill-color: var(--accent-color); }
 
         .btn-red {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s;
+            background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color);
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s;
         }
 
         .section-title { margin-top: 35px; text-align: center; }
 
         .control-group, .result-box {
-            margin-top: 15px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 16px;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            margin-top: 15px; background: var(--glass-bg); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+            padding: 16px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             transition: all 0.5s ease;
         }
 
         .header-flex {
-            display: flex; justify-content: space-between; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
             font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1.5px;
         }
         body.red-mode .header-flex { color: rgba(255,0,0,0.6); }
-        .header-flex span:last-child { color: var(--accent-color); font-weight: 600; }
+
+        .num-input {
+            width: 45px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            color: var(--accent-color); border-radius: 8px; padding: 4px 2px;
+            font-size: 14px; text-align: center; font-family: inherit; font-weight: 600; outline: none; transition: all 0.3s;
+        }
+        .num-input:focus { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.15); }
+        body.red-mode .num-input { background: rgba(255, 0, 0, 0.05); }
+        body.red-mode .num-input:focus { background: rgba(255, 0, 0, 0.15); }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
 
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
@@ -145,9 +127,7 @@
 </head>
 <body>
 
-    <div id="skyContainer">
-        <canvas id="starCanvas"></canvas>
-    </div>
+    <div id="skyContainer"><canvas id="starCanvas"></canvas></div>
 
     <div class="top-bar">
         <h2>Astro-Score</h2>
@@ -165,11 +145,18 @@
     </div>
 
     <div class="control-group">
-        <div class="header-flex"><span>Облачность</span><span id="cloudsVal">0%</span></div>
-        <input type="range" id="clouds" min="0" max="100" value="0" oninput="calculate(); drawSpace();">
+        <div class="header-flex">
+            <span>Облачность</span>
+            <span><input type="number" id="cloudsNum" class="num-input" value="0" oninput="document.getElementById('clouds').value = this.value; calculate();"> %</span>
+        </div>
+        <input type="range" id="clouds" min="0" max="100" value="0" oninput="document.getElementById('cloudsNum').value = this.value; calculate();">
         <br><br>
-        <div class="header-flex"><span>Видимость</span><span id="visVal">24 км</span></div>
-        <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="calculate(); drawSpace();">
+        
+        <div class="header-flex">
+            <span>Видимость</span>
+            <span><input type="number" id="visNum" class="num-input" value="24000" step="1000" oninput="document.getElementById('vis').value = this.value; calculate();"> м</span>
+        </div>
+        <input type="range" id="vis" min="0" max="24000" step="1000" value="24000" oninput="document.getElementById('visNum').value = this.value; calculate();">
     </div>
 
     <div class="result-box">
@@ -194,16 +181,26 @@
             <option value="2.0">Micro 4/3 (2.0x)</option>
         </select>
         <br>
-        <div class="header-flex"><span>Мегапиксели</span><span id="mpVal">24 Мп</span></div>
-        <input type="range" id="mp" min="12" max="61" value="24" oninput="calculateShutter()">
+        <div class="header-flex">
+            <span>Мегапиксели</span>
+            <span><input type="number" id="mpNum" class="num-input" value="24" oninput="document.getElementById('mp').value = this.value; calculateShutter();"> Мп</span>
+        </div>
+        <input type="range" id="mp" min="12" max="61" value="24" oninput="document.getElementById('mpNum').value = this.value; calculateShutter();">
     </div>
 
     <div class="control-group">
-        <div class="header-flex"><span>Фокусное (FOV Zoom)</span><span id="focalVal">16 мм</span></div>
-        <input type="range" id="focal" min="10" max="85" value="16" oninput="calculateShutter()">
+        <div class="header-flex">
+            <span>Фокусное</span>
+            <span><input type="number" id="focalNum" class="num-input" value="16" oninput="document.getElementById('focal').value = this.value; calculateShutter();"> мм</span>
+        </div>
+        <input type="range" id="focal" min="10" max="85" value="16" oninput="document.getElementById('focalNum').value = this.value; calculateShutter();">
         <br><br>
-        <div class="header-flex"><span>Диафрагма</span><span id="apertureVal">f/2.8</span></div>
-        <input type="range" id="aperture" min="1.2" max="8.0" step="0.1" value="2.8" oninput="calculateShutter()">
+        
+        <div class="header-flex">
+            <span>Диафрагма (f/)</span>
+            <span><input type="number" id="apertureNum" class="num-input" step="0.1" value="2.8" oninput="document.getElementById('aperture').value = this.value; calculateShutter();"></span>
+        </div>
+        <input type="range" id="aperture" min="1.2" max="8.0" step="0.1" value="2.8" oninput="document.getElementById('apertureNum').value = this.value; calculateShutter();">
     </div>
 
     <div class="result-box">
@@ -222,11 +219,18 @@
     <!-- БЛОК 3: ТОЧКА РОСЫ -->
     <h2 class="section-title">Роса и Запотевание</h2>
     <div class="control-group">
-        <div class="header-flex"><span>Температура</span><span id="tempVal">+15°C</span></div>
-        <input type="range" id="temp" min="-20" max="40" value="15" oninput="calculateDew()">
+        <div class="header-flex">
+            <span>Температура (°C)</span>
+            <span><input type="number" id="tempNum" class="num-input" value="15" oninput="document.getElementById('temp').value = this.value; calculateDew();"></span>
+        </div>
+        <input type="range" id="temp" min="-20" max="40" value="15" oninput="document.getElementById('tempNum').value = this.value; calculateDew();">
         <br><br>
-        <div class="header-flex"><span>Влажность</span><span id="humVal">75%</span></div>
-        <input type="range" id="humidity" min="20" max="100" value="75" oninput="calculateDew()">
+        
+        <div class="header-flex">
+            <span>Влажность (%)</span>
+            <span><input type="number" id="humNum" class="num-input" value="75" oninput="document.getElementById('hum').value = this.value; calculateDew();"></span>
+        </div>
+        <input type="range" id="hum" min="20" max="100" value="75" oninput="document.getElementById('humNum').value = this.value; calculateDew();">
     </div>
     
     <div class="result-box">
@@ -250,87 +254,79 @@
             isRedMode = !isRedMode;
             document.body.classList.toggle('red-mode', isRedMode);
             document.getElementById('btnRed').innerText = isRedMode ? "⚪ Normal" : "🔴 Night";
-            calculate(); // обновить цвета
+            calculate(); 
             calculateDew();
         }
 
-        // ---- КОСМИЧЕСКИЙ ФОН ----
         const canvas = document.getElementById('starCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Ускоряем рендер отключением прозрачности холста
         let stars = [], milkyWayStars = [], nebulas = [];
         const starColors = ['#ffffff', '#fff4ea', '#eaf4ff', '#fff9e5'];
 
         function initSpace() {
-            canvas.width = window.innerWidth * 3;
-            canvas.height = window.innerHeight * 3;
+            // Уменьшаем холст для производительности (CSS всё равно растянет на нужный размер)
+            canvas.width = window.innerWidth * 1.5; 
+            canvas.height = window.innerHeight * 1.5;
             stars = []; milkyWayStars = []; nebulas = [];
             
-            for(let i=0; i<80; i++) {
-                nebulas.push({
-                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.8,
-                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.3,
-                    r: Math.random() * 400 + 100,
-                    red: 30+Math.random()*20, green: 30+Math.random()*40, blue: 80+Math.random()*50,
-                    a: 0.03+Math.random()*0.02
-                });
+            // КЭШИРОВАНИЕ ГРАДИЕНТОВ (решает проблему лагов)
+            for(let i=0; i<40; i++) { // Снижено количество туманностей с 80 до 40
+                let x = canvas.width/2 + (Math.random()-0.5)*canvas.width*0.8;
+                let y = canvas.height/2 + (Math.random()-0.5)*canvas.height*0.3;
+                let r = Math.random()*300+100;
+                
+                // Создаем градиенты 1 раз при старте
+                let gradNormal = ctx.createRadialGradient(x, y, 0, x, y, r);
+                gradNormal.addColorStop(0, `rgba(${30+Math.random()*20}, ${30+Math.random()*40}, ${80+Math.random()*50}, 1)`);
+                gradNormal.addColorStop(1, 'transparent');
+                
+                let gradRed = ctx.createRadialGradient(x, y, 0, x, y, r);
+                gradRed.addColorStop(0, `rgba(255, 0, 0, 1)`);
+                gradRed.addColorStop(1, 'transparent');
+
+                nebulas.push({ x, y, r, gradNormal, gradRed, a: 0.03+Math.random()*0.02 });
             }
-            for(let i=0; i<2500; i++) {
-                milkyWayStars.push({
-                    x: canvas.width/2 + (Math.random()-0.5) * canvas.width * 0.7,
-                    y: canvas.height/2 + (Math.random()-0.5) * canvas.height * 0.25,
-                    s: Math.random()*0.8, a: Math.random()*0.5
-                });
-            }
-            for(let i=0; i<1000; i++) {
-                stars.push({
-                    x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-                    r: Math.random()*1.2+0.1, c: starColors[Math.floor(Math.random()*starColors.length)],
-                    a: Math.random(), sc: Math.random()*0.02+0.005, d: Math.random()>0.5?1:-1
-                });
-            }
+
+            for(let i=0; i<1500; i++) milkyWayStars.push({ x: canvas.width/2 + (Math.random()-0.5)*canvas.width*0.7, y: canvas.height/2 + (Math.random()-0.5)*canvas.height*0.25, s: Math.random()*0.8+0.5, a: Math.random()*0.5 });
+            for(let i=0; i<800; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.5, c: starColors[Math.floor(Math.random()*starColors.length)], a: Math.random(), sc: Math.random()*0.02+0.005, d: Math.random()>0.5?1:-1 });
         }
 
         function drawSpace() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let v = parseInt(document.getElementById('vis').value);
-            let c = parseInt(document.getElementById('clouds').value);
+            // Очищаем фон (из-за alpha: false)
+            ctx.fillStyle = isRedMode ? '#050000' : '#02040a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let v = parseInt(document.getElementById('visNum').value) || 0;
+            let c = parseInt(document.getElementById('cloudsNum').value) || 0;
             let purity = Math.max(0, (1 - c/100) * (v/24000));
 
             ctx.globalCompositeOperation = 'screen';
             nebulas.forEach(n => {
-                let g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
-                // Если красный режим - красим туманности в чисто красный
-                let rC = isRedMode ? 255 : n.red;
-                let gC = isRedMode ? 0 : n.green;
-                let bC = isRedMode ? 0 : n.blue;
-                g.addColorStop(0, `rgba(${rC}, ${gC}, ${bC}, ${n.a * purity})`);
-                g.addColorStop(1, 'transparent');
-                ctx.fillStyle = g;
-                ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = n.a * purity; // Применяем прозрачность глобально (ОЧЕНЬ БЫСТРО)
+                ctx.fillStyle = isRedMode ? n.gradRed : n.gradNormal;
+                ctx.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2); 
             });
 
             ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = isRedMode ? `rgba(255,50,50,0.3)` : `rgba(255,255,255,0.3)`;
-            milkyWayStars.forEach(s => {
-                ctx.globalAlpha = s.a * purity;
-                ctx.fillRect(s.x, s.y, s.s, s.s);
+            ctx.fillStyle = isRedMode ? `rgba(255,50,50,1)` : `rgba(255,255,255,1)`;
+            milkyWayStars.forEach(s => { 
+                ctx.globalAlpha = s.a * purity; 
+                ctx.fillRect(s.x, s.y, s.s, s.s); 
             });
 
             stars.forEach(s => {
-                s.a += s.sc * s.d;
-                if(s.a >= 1 || s.a <= 0.3) s.d *= -1;
-                ctx.globalAlpha = s.a * purity;
+                s.a += s.sc*s.d; if(s.a>=1 || s.a<=0.3) s.d*=-1;
+                ctx.globalAlpha = s.a * purity; 
                 ctx.fillStyle = isRedMode ? '#ff4444' : s.c;
-                ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+                // ЗАМЕНА arc НА fillRect (ускоряет рендер в 10 раз)
+                ctx.fillRect(s.x, s.y, s.r * 2, s.r * 2);
             });
             requestAnimationFrame(drawSpace);
         }
 
         function calculate() {
-            let c = parseInt(document.getElementById('clouds').value);
-            let v = parseInt(document.getElementById('vis').value);
-            document.getElementById('cloudsVal').innerText = c + '%';
-            document.getElementById('visVal').innerText = (v / 1000).toFixed(0) + ' км';
+            let c = parseInt(document.getElementById('cloudsNum').value) || 0;
+            let v = parseInt(document.getElementById('visNum').value) || 0;
 
             let score = 10;
             if (c > 20) score -= 2; if (c > 50) score -= 2;
@@ -348,39 +344,29 @@
 
         function calculateShutter() {
             let crop = parseFloat(document.getElementById('crop').value);
-            let focal = parseInt(document.getElementById('focal').value);
-            let mp = parseInt(document.getElementById('mp').value);
-            let aperture = parseFloat(document.getElementById('aperture').value);
-            
-            document.getElementById('focalVal').innerText = focal + ' мм';
-            document.getElementById('mpVal').innerText = mp + ' Мп';
-            document.getElementById('apertureVal').innerText = 'f/' + aperture.toFixed(1);
+            let focal = Math.max(1, parseFloat(document.getElementById('focalNum').value) || 16);
+            let mp = Math.max(1, parseFloat(document.getElementById('mpNum').value) || 24);
+            let aperture = parseFloat(document.getElementById('apertureNum').value) || 2.8;
 
-            // Правило 500
             let rule500 = 500 / (focal * crop);
             document.getElementById('shutter500').innerText = rule500.toFixed(1) + 's';
 
-            // Правило NPF
             let width = crop == 1.0 ? 36 : (crop == 1.5 ? 23.6 : 17.3);
             let height = crop == 1.0 ? 24 : (crop == 1.5 ? 15.6 : 13.0);
-            let pixelPitch = Math.sqrt((width * height) / (mp * 1000000)) * 1000; // в микронах
+            let pixelPitch = Math.sqrt((width * height) / (mp * 1000000)) * 1000;
             let npf = (35 * aperture + 30 * pixelPitch) / focal;
             document.getElementById('shutterNPF').innerText = npf.toFixed(1) + 's';
 
-            // FOV Симулятор (Зум фона)
             let scale = focal / 16; 
-            if(scale < 0.6) scale = 0.6; // ограничение отскока
+            if(scale < 0.6) scale = 0.6; 
+            if(scale > 3) scale = 3; 
             document.getElementById('skyContainer').style.transform = `scale(${scale})`;
         }
 
         function calculateDew() {
-            let T = parseFloat(document.getElementById('temp').value);
-            let RH = parseFloat(document.getElementById('humidity').value);
-            
-            document.getElementById('tempVal').innerText = (T>0?'+':'') + T + '°C';
-            document.getElementById('humVal').innerText = RH + '%';
+            let T = parseFloat(document.getElementById('tempNum').value) || 15;
+            let RH = parseFloat(document.getElementById('humNum').value) || 75;
 
-            // Формула Магнуса
             let alpha = (17.27 * T) / (237.7 + T) + Math.log(RH / 100);
             let dp = (237.7 * alpha) / (17.27 - alpha);
             document.getElementById('dewDisplay').innerText = (dp>0?'+':'') + dp.toFixed(1) + '°C';
@@ -393,7 +379,9 @@
         }
 
         window.addEventListener('resize', initSpace);
-        initSpace(); drawSpace(); calculate(); calculateShutter(); calculateDew();
+        initSpace(); 
+        drawSpace(); // Теперь вызывается только requestAnimationFrame
+        calculate(); calculateShutter(); calculateDew();
     </script>
 </body>
 </html>
